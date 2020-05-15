@@ -1,0 +1,28 @@
+server:
+  address: 0.0.0.0
+  port: 8280
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    context-path: /tracedebug
+
+spring:
+  profiles:
+    active: dev
+
+
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+
+  jpa:
+    database: mysql
+    hibernate:
+      dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      jdbc:
+        time_zone: UTC
+
+#logback
+logging:
+  config: classpath:logback.xml
