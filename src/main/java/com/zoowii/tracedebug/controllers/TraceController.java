@@ -1,5 +1,6 @@
 package com.zoowii.tracedebug.controllers;
 
+import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
 import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
 import com.zoowii.tracedebug.http.BeanPage;
 import com.zoowii.tracedebug.http.BeanPaginator;
@@ -45,12 +46,12 @@ public class TraceController {
         return spanStackTraceEntities;
     }
 
-    @GetMapping("/view_stack_variables/span")
+    @PostMapping("/view_stack_variables/span")
     public @ResponseBody Object viewStackVariablesInSpan(@RequestBody ViewStackVariablesForm form) {
         log.info("viewStackVariablesInSpan form {}", form);
-        List<SpanDumpItemEntity> stackVariables = traceSpanService.listAllMergedSpanDumpsBySpanIdAndSeqInSpan(form.getSpanId(),
-                form.getSeqInSpan()!=null?form.getSeqInSpan():0);
-        return stackVariables;
+        StackVarSnapshotVo stackVarSnapshot = traceSpanService.listAllMergedSpanDumpsBySpanIdAndSeqInSpan(
+                form.getSpanId(), form.getSeqInSpan()!=null?form.getSeqInSpan():0);
+        return stackVarSnapshot;
     }
 
     // TODO: 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
