@@ -1,6 +1,7 @@
 package com.zoowii.tracedebug.controllers;
 
 import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
+import com.zoowii.tracedebug.controllers.vo.StepStackForm;
 import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
 import com.zoowii.tracedebug.http.BeanPage;
 import com.zoowii.tracedebug.http.BeanPaginator;
@@ -54,7 +55,11 @@ public class TraceController {
         return stackVarSnapshot;
     }
 
-    // TODO: 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
+    // 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
+    @PostMapping("/next_step_span_seq")
+    public @ResponseBody Object findNextStepSpanSeq(@RequestBody StepStackForm form) {
+        log.info("findNextStepSpanSeq form {}", form);
 
-    // TODO: view breakpoints, add breakpoints to session, step over/step in/step out
+        return "TODO";
+    }
 }
