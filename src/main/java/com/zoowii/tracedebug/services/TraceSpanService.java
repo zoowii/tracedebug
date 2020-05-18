@@ -30,8 +30,8 @@ public class TraceSpanService {
     @Resource
     private SpanStackTraceRepository spanStackTraceRepository;
 
-    public List<TraceSpanEntity> findSpansByTraceId(String traceId) {
-        return traceSpanRepository.findAllByTraceId(traceId);
+    public List<TraceSpanEntity> findAllByTraceIdOrderByIdAsc(String traceId) {
+        return traceSpanRepository.findAllByTraceIdOrderByIdAsc(traceId);
     }
 
     public BeanPage<String> listTraceIds(BeanPaginator paginator) {
@@ -50,6 +50,10 @@ public class TraceSpanService {
 
     public List<SpanDumpItemEntity> listSpanDumpItems(String spanId) {
         return spanDumpItemRepository.findAllBySpanIdOrderBySeqInSpan(spanId);
+    }
+
+    public List<SpanDumpItemEntity> findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(String spanId, int seqInSpan) {
+        return spanDumpItemRepository.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(spanId, seqInSpan);
     }
 
     /**

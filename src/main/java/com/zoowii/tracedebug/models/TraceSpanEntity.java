@@ -30,4 +30,6 @@ public class TraceSpanEntity {
     private String classname;
     @Column(name = "method_name", nullable = false)
     private String methodName;
+    @Column(name = "stack_depth", nullable = false)
+    private Integer stackDepth;
 }

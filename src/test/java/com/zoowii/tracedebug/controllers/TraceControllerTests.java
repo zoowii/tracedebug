@@ -18,7 +18,7 @@ public class TraceControllerTests {
     @Test
     public void testViewStackVariables() {
         ViewStackVariablesForm form = new ViewStackVariablesForm();
-        form.setSpanId("9de7f02b-ca66-4f52-9324-4da2012a5eae");
+        form.setSpanId("574e1fe0-acd0-4f19-8262-d094416ac08f");
         form.setSeqInSpan(7);
         StackVarSnapshotVo response = restTemplate.postForObject(
                 "/api/trace/view_stack_variables/span",

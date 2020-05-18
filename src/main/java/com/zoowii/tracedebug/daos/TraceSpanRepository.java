@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface TraceSpanRepository extends CrudRepository<TraceSpanEntity, Long> {
 
-    List<TraceSpanEntity> findAllByTraceId(String traceId);
+    List<TraceSpanEntity> findAllByTraceIdOrderByIdAsc(String traceId);
 
     TraceSpanEntity findBySpanId(String spanId);
 
