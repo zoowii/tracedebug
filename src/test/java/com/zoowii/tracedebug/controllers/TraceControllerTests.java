@@ -1,11 +1,15 @@
 package com.zoowii.tracedebug.controllers;
 
+import com.zoowii.tracedebug.controllers.vo.NextRequestResponseVo;
 import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
+import com.zoowii.tracedebug.controllers.vo.StepStackForm;
 import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
 
 @Slf4j
 public class TraceControllerTests {
@@ -24,5 +28,17 @@ public class TraceControllerTests {
                 "/api/trace/view_stack_variables/span",
                 form, StackVarSnapshotVo.class);
         log.info("view_stack_variables response {}", response);
+    }
+
+    @Test
+    public void testNextRequest() {
+        StepStackForm form = new StepStackForm();
+        form.setCurrentSpanId("574e1fe0-acd0-4f19-8262-d094416ac08f");
+        form.setCurrentSeqInSpan(7);
+        form.setStepType("step_over");
+        form.setBreakpoints(new ArrayList<>());
+        NextRequestResponseVo response = restTemplate.postForObject(
+                "/api/trace/next_step_span_seq", form, NextRequestResponseVo.class);
+        log.info("next_step_span_seq response {}", response);
     }
 }

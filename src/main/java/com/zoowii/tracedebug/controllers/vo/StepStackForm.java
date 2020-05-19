@@ -7,8 +7,8 @@ import java.util.List;
 @Data
 public class StepStackForm {
     private List<BreakpointVo> breakpoints;
-    private String traceId;
+//    private String traceId;
     private String currentSpanId;
     private int currentSeqInSpan;
-    private String stepType; // 断点调试步进的类型，"step_over", "step_in", "step_out"
+    private String stepType; // 断点调试步进的类型，"step_over", "step_in", "step_out", "continue"
 }

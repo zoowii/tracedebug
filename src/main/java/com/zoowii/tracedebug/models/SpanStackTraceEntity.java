@@ -32,4 +32,6 @@ public class SpanStackTraceEntity {
     private String methodName;
     @Column(name = "line", nullable = false)
     private Integer line;
+    @Column(name = "filename")
+    private String filename;
 }

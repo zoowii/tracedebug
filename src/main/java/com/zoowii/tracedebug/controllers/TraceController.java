@@ -1,5 +1,6 @@
 package com.zoowii.tracedebug.controllers;
 
+import com.zoowii.tracedebug.controllers.vo.NextRequestResponseVo;
 import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
 import com.zoowii.tracedebug.controllers.vo.StepStackForm;
 import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
@@ -58,19 +59,18 @@ public class TraceController {
 
     // 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
     @PostMapping("/next_step_span_seq")
-    public @ResponseBody Object findNextStepSpanSeq(@RequestBody StepStackForm form)
+    public @ResponseBody NextRequestResponseVo findNextStepSpanSeq(@RequestBody StepStackForm form)
             throws SpanNotFoundException {
         log.info("findNextStepSpanSeq form {}", form);
 
         int currentSeqInSpan = form.getCurrentSeqInSpan();
         String currentSpanId = form.getCurrentSpanId();
         String stepType = form.getStepType();
-        // TODO
-        TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(currentSpanId);
-        if(traceSpanEntity == null) {
+        TraceSpanEntity currentTraceSpanEntity = traceSpanService.findSpanBySpanId(currentSpanId);
+        if(currentTraceSpanEntity == null) {
             throw new SpanNotFoundException("can't find span " + form.getCurrentSpanId());
         }
-        String traceId = traceSpanEntity.getTraceId();
+        String traceId = currentTraceSpanEntity.getTraceId();
         List<TraceSpanEntity> traceSpansInTrace = traceSpanService.findAllByTraceIdOrderByIdAsc(traceId);
         // 排除比当前spanId更早的span记录
         List<TraceSpanEntity> spansAfterOrSelf = new ArrayList<>();
@@ -80,7 +80,7 @@ public class TraceController {
                 spansAfterOrSelf.add(spanEntity);
                 continue;
             }
-            if(spanEntity.getSpanId()!=null&&spanEntity.equals(currentSpanId)) {
+            if(spanEntity.getSpanId()!=null&&spanEntity.getSpanId().equals(currentSpanId)) {
                 foundCurrentSpan = true;
                 spansAfterOrSelf.add(spanEntity);
             }
@@ -98,15 +98,43 @@ public class TraceController {
                         spanEntity.getSpanId(), currentSeqInSpan);
                 if(!spanDumpItemEntities.isEmpty()) {
                     // 断点调试的下一个暂停点
-                    return spanDumpItemEntities.get(0);
+                    return new NextRequestResponseVo(traceId, spanEntity.getSpanId(),
+                            spanDumpItemEntities.get(0).getSeqInSpan());
+                } else {
+                    continue;
                 }
             } else {
                 // 当前spanId之后的span的情况，从小到大依次处理各seqInSpan的情况，根据stepType和stackDepth处理
                 // TODO: 根据breakpoints处理，也可能中途停下来
-                // TODO
+                switch (stepType) {
+                    case "step_out": {
+                        if(spanEntity.getStackDepth()>=currentTraceSpanEntity.getStackDepth()) {
+                            continue;
+                        }
+                        return new NextRequestResponseVo(traceId, spanEntity.getSpanId(), 0);
+                    }
+                    case "step_over": {
+                        if(spanEntity.getStackDepth()>currentTraceSpanEntity.getStackDepth()) {
+                            continue;
+                        }
+                        return new NextRequestResponseVo(traceId, spanEntity.getSpanId(), 0);
+                    }
+                    case "step_in": {
+                        // default
+                    } break;
+                    case "continue": {
+                        // TODO: 继续运行直到遇到断点或者结束
+                    } break;
+                    default: {
+                        // default
+                    }
+                }
+                List<SpanDumpItemEntity> spanDumpItemEntities = traceSpanService.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(
+                        spanEntity.getSpanId(), -1);
+                return new NextRequestResponseVo(traceId, spanEntity.getSpanId(), 0);
             }
         }
 
-        return "TODO";
+        return null;
     }
 }
