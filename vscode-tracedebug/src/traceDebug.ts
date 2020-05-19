@@ -11,7 +11,7 @@ import {
 } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
-import { MockRuntime, MockBreakpoint } from './traceRuntime';
+import { TraceRuntime, MockBreakpoint } from './traceRuntime';
 // import * as http from 'http';
 const rp = require('request-promise');
 const { Subject } = require('await-notify');
@@ -41,7 +41,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 	private static THREAD_ID = 1;
 
 	// a Mock runtime (or debugger)
-	private _runtime: MockRuntime;
+	private _runtime: TraceRuntime;
 
 	private _variableHandles = new Handles<string>();
 
@@ -66,7 +66,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.setDebuggerLinesStartAt1(false);
 		this.setDebuggerColumnsStartAt1(false);
 
-		this._runtime = new MockRuntime();
+		this._runtime = new TraceRuntime();
 
 		// setup event handlers
 		this._runtime.on('stopOnEntry', () => {
