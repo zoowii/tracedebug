@@ -230,7 +230,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
-	protected async stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
+	protected async stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments) {
 
 		// const startFrame = typeof args.startFrame === 'number' ? args.startFrame : 0;
 		// const maxLevels = typeof args.levels === 'number' ? args.levels : 1000;
@@ -258,8 +258,8 @@ export class TraceDebugSession extends LoggingDebugSession {
 			json: true
 		})
 		console.log('view span stack trace response', res)
-		const stackFrames = []
-		for(const i in res) {
+		const stackFrames: Array<StackFrame> = []
+		for(let i=0;i<res.length;i++) {
 			const item = res[i];
 			// TODO: change from classname + moduleId to source file path
 			let filename = item.classname;
@@ -404,7 +404,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	 }
 
-	protected async nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+	protected async nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments) {
 		this._runtime.step();
 		// TODO: step over
 
