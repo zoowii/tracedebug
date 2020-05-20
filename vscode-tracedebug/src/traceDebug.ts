@@ -260,9 +260,9 @@ export class TraceDebugSession extends LoggingDebugSession {
 		const stackFrames: Array<StackFrame> = []
 		for(let i=0;i<res.length;i++) {
 			const item = res[i];
-			// TODO: change from classname + moduleId to source file path
-			let filename = item.classname;
-			filename = `E:/projects/cglibdemo/src/main/java/cglibdemo/Dao.java`;
+			const moduleId = item.moduleId
+			const classname = item.classname
+			const filename = this.rpcClient.resolveFilename(moduleId, classname, item.filename);
 			const sf = new StackFrame(i, item.methodName, this.createSource(filename), this.convertDebuggerLineToClient((item.line || 1) - 1));
 			if (typeof item.column === 'number') {
 				sf.column = this.convertDebuggerColumnToClient(item.column);
@@ -447,7 +447,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 
 	// TODO
 	private currentTraceId: string = 'test'
-	private currentSpanId: string = '268fa437-1c22-4fb9-9d54-1f82a70e36e7'
+	private currentSpanId: string = '396dd782-0534-46ff-9197-2c8d17294a13'
 	private currentSeqInSpan: Number = 0
 
 	protected async stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments) {

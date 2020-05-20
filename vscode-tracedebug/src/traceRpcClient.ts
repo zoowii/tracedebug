@@ -44,4 +44,7 @@ export class TraceRpcClient {
 		})
 		return res
 	}
+	resolveFilename(moduleId: string, classname: string, filename: string): string {
+		return `E:/projects/cglibdemo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
+	}
 }

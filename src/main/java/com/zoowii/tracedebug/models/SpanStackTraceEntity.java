@@ -26,6 +26,8 @@ public class SpanStackTraceEntity {
     private String spanId;
     @Column(name = "stack_index", nullable = false)
     private Integer stackIndex;
+    @Column(name = "module_id")
+    private String moduleId;
     @Column(name = "classname", nullable = false)
     private String classname;
     @Column(name = "method_name", nullable = false)
