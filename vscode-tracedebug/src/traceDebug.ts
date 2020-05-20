@@ -12,7 +12,7 @@ import {
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
 import { TraceRuntime, MockBreakpoint } from './traceRuntime';
-import { TraceRpcClient } from './traceRpcClient';
+import { TraceRpcClient, getCurrentTraceId } from './traceRpcClient';
 // import * as http from 'http';
 const rp = require('request-promise');
 const { Subject } = require('await-notify');
@@ -56,9 +56,9 @@ export class TraceDebugSession extends LoggingDebugSession {
 	private _cancelledProgressId: string | undefined = undefined;
 	private _isProgressCancellable = true;
 
-	// TODO
-	private currentTraceId ?: string = 'test'
-	private currentSpanId ?: string = 'c352dd7b-9abd-44c4-80eb-c353014d0c8d'; // '396dd782-0534-46ff-9197-2c8d17294a13'
+	// 调试器当前的traceId, spanId, seqInSpan
+	private currentTraceId ?: string = undefined
+	private currentSpanId ?: string = undefined
 	private currentSeqInSpan?: Number = 0
 
 	/**
@@ -169,6 +169,16 @@ export class TraceDebugSession extends LoggingDebugSession {
 	}
 
 	protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
+
+		this.currentTraceId = getCurrentTraceId();
+		console.log('current traceId set to ' + this.currentTraceId)
+
+		const firstSpanRes = await this.rpcClient.getNextRequest(this.currentTraceId, undefined, undefined, 'step_over', [])
+		if(firstSpanRes) {
+			console.log('firstSpanRes', firstSpanRes)
+			this.currentSpanId = firstSpanRes.spanId
+			this.currentSeqInSpan = firstSpanRes.seqInSpan
+		}
 
 		// make sure to 'Stop' the buffered logging if 'trace' is not set
 		logger.setup(args.trace ? Logger.LogLevel.Verbose : Logger.LogLevel.Stop, false);
@@ -327,7 +337,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 
 			const id = this._variableHandles.get(args.variablesReference);
 
-			// TODO: get variables from api
+			// get variables from api
 			const spanId = this.currentSpanId
 			const seqInSpan = this.currentSeqInSpan
 			const res = await this.rpcClient.getStackVariables(spanId, seqInSpan)
@@ -399,7 +409,6 @@ export class TraceDebugSession extends LoggingDebugSession {
 	 }
 
 	 private async sendNextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments, stepType: string) {
-		// TODO
 		this.sendResponse(response);
 
 		if(!this.currentSpanId) {
@@ -408,7 +417,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 			return
 		}
 		const breakpoints = []
-		const res = await this.rpcClient.getNextRequest(<string> this.currentSpanId, <Number> this.currentSeqInSpan, stepType, breakpoints)
+		const res = await this.rpcClient.getNextRequest(this.currentTraceId, this.currentSpanId, this.currentSeqInSpan, stepType, breakpoints)
 		console.log('next step span response', res)
 		if(!res || !res.spanId) {
 			this.currentSpanId = undefined
@@ -416,7 +425,6 @@ export class TraceDebugSession extends LoggingDebugSession {
 			console.log('end trace')
 			this.sendEvent(new TerminatedEvent())
 			return
-			// TODO: end
 		}
 		this.currentSpanId = res.spanId
 		this.currentSeqInSpan = res.seqInSpan

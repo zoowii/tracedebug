@@ -9,6 +9,7 @@ import com.zoowii.tracedebug.models.SpanStackTraceEntity;
 import com.zoowii.tracedebug.models.TraceSpanEntity;
 import com.zoowii.tracedebug.services.TraceSpanService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -62,6 +63,15 @@ public class TraceController {
     public @ResponseBody NextRequestResponseVo findNextStepSpanSeq(@RequestBody StepStackForm form)
             throws SpanNotFoundException {
         log.info("findNextStepSpanSeq form {}", form);
+
+        if(StringUtils.isEmpty(form.getCurrentSpanId()) && !StringUtils.isEmpty(form.getTraceId())) {
+            // 只提供了traceId，要找此traceId的第一个spanId
+            TraceSpanEntity firstTraceSpan = traceSpanService.findFirstSpanOfTrace(form.getTraceId());
+            if(firstTraceSpan == null) {
+                throw new SpanNotFoundException("can't find trace " + form.getTraceId());
+            }
+            return new NextRequestResponseVo(firstTraceSpan.getTraceId(), firstTraceSpan.getSpanId(), 0);
+        }
 
         int currentSeqInSpan = form.getCurrentSeqInSpan();
         String currentSpanId = form.getCurrentSpanId();

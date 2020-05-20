@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken } from 'vscode';
 import { TraceDebugSession } from './traceDebug';
+import { setCurrentTraceId } from './traceRpcClient';
 import * as Net from 'net';
 
 /*
@@ -17,11 +18,27 @@ const runMode: 'external' | 'server' | 'inline' = 'inline';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	context.subscriptions.push(vscode.commands.registerCommand('extension.mock-debug.getProgramName', config => {
+	context.subscriptions.push(vscode.commands.registerCommand('extension.trace-debug.getProgramName', config => {
 		return vscode.window.showInputBox({
 			placeHolder: "Please enter the name of a markdown file in the workspace folder",
 			value: "readme.md"
 		});
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('traceDebug.setTraceId', (traceId: string='') => {
+		vscode.window.showInputBox({
+			placeHolder: "Please enter the traceId you want to debugger",
+			value: ''
+		}).then((traceId: string) => {
+			console.log('receive traceId ' + traceId)
+			if(!traceId) {
+				console.log('empty trace id')
+				// TODO: show alert to notify
+				return
+			}
+			setCurrentTraceId(traceId)
+			// TODO: set current traceId
+		})
 	}));
 
 	// register a configuration provider for 'tracedebug' debug type

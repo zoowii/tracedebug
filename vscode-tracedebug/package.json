@@ -56,12 +56,19 @@
 	"activationEvents": [
 		"onDebug",
 		"onDebugDynamicConfigurations:mock",
-		"onCommand:extension.mock-debug.getProgramName"
+		"onCommand:extension.trace-debug.getProgramName",
+		"onCommand:traceDebug.setTraceId"
 	],
 	"contributes": {
 		"breakpoints": [
 			{
 				"language": "markdown"
+			}
+		],
+		"commands": [
+			{
+				"command": "traceDebug.setTraceId",
+				"title": "setTraceId"
 			}
 		],
 		"debuggers": [
@@ -117,7 +124,7 @@
 					}
 				],
 				"variables": {
-					"AskForProgramName": "extension.mock-debug.getProgramName"
+					"AskForProgramName": "extension.trace-debug.getProgramName"
 				}
 			}
 		]

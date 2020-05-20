@@ -44,6 +44,10 @@ public class TraceSpanService {
         return traceSpanRepository.findBySpanId(spanId);
     }
 
+    public TraceSpanEntity findFirstSpanOfTrace(String traceId) {
+        return traceSpanRepository.findFirstByTraceIdOrderByIdAsc(traceId);
+    }
+
     public List<SpanStackTraceEntity> listSpanStackTrace(String spanId, Integer seqInSpan) {
         List<SpanStackTraceEntity> spanStackTraceEntities = spanStackTraceRepository.findAllBySpanIdOrderByStackIndexAsc(spanId);
         if(spanStackTraceEntities.isEmpty()) {

@@ -29,9 +29,10 @@ export class TraceRpcClient {
 		})
 		return res
 	}
-	async getNextRequest(spanId : string, seqInSpan: Number, stepType: string, breakpoints) {
+	async getNextRequest(traceId: string | undefined, spanId : string | undefined, seqInSpan: Number | undefined, stepType: string, breakpoints) {
 		const url = `${endpoint}/api/trace/next_step_span_seq`
 		const reqData = {
+			traceId: traceId,
 			currentSpanId: spanId,
 			currentSeqInSpan: seqInSpan,
 			stepType: stepType
@@ -48,4 +49,14 @@ export class TraceRpcClient {
 		// E:/projects
 		return `C:/Users/zoowii/projects/cglibdemo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
 	}
+}
+
+let currentTraceId: string = 'test' // ''  'test' is for development
+
+export function setCurrentTraceId(traceId: string) {
+	currentTraceId = traceId
+}
+
+export function getCurrentTraceId(): string {
+	return currentTraceId
 }
