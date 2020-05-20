@@ -56,6 +56,11 @@ export class TraceDebugSession extends LoggingDebugSession {
 	private _cancelledProgressId: string | undefined = undefined;
 	private _isProgressCancellable = true;
 
+	// TODO
+	private currentTraceId ?: string = 'test'
+	private currentSpanId ?: string = 'c352dd7b-9abd-44c4-80eb-c353014d0c8d'; // '396dd782-0534-46ff-9197-2c8d17294a13'
+	private currentSeqInSpan?: Number = 0
+
 	/**
 	 * Creates a new debug adapter that is used for one debug session.
 	 * We configure the default implementation of a debug adapter here.
@@ -252,10 +257,10 @@ export class TraceDebugSession extends LoggingDebugSession {
 		// 	totalFrames: stk.count
 		// };
 
-		// TODO: get stack frames of span from api server
+		// get stack frames of span from api server
 		const spanId = this.currentSpanId
 		const seqInSpan = this.currentSeqInSpan
-		const res = await this.rpcClient.getSpanStackTrace(spanId, seqInSpan);
+		const res = await this.rpcClient.getSpanStackTrace(<string> spanId, <Number> seqInSpan);
 		console.log('view span stack trace response', res)
 		const stackFrames: Array<StackFrame> = []
 		for(let i=0;i<res.length;i++) {
@@ -403,11 +408,11 @@ export class TraceDebugSession extends LoggingDebugSession {
 			return
 		}
 		const breakpoints = []
-		const res = await this.rpcClient.getNextRequest(this.currentSpanId, this.currentSeqInSpan, stepType, breakpoints)
+		const res = await this.rpcClient.getNextRequest(<string> this.currentSpanId, <Number> this.currentSeqInSpan, stepType, breakpoints)
 		console.log('next step span response', res)
 		if(!res || !res.spanId) {
-			this.currentSpanId = null
-			this.currentSeqInSpan = null
+			this.currentSpanId = undefined
+			this.currentSeqInSpan = undefined
 			console.log('end trace')
 			this.sendEvent(new TerminatedEvent())
 			return
@@ -419,14 +424,16 @@ export class TraceDebugSession extends LoggingDebugSession {
 	 }
 
 	protected async nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments) {
-		this._runtime.step();
+		// this._runtime.step();
+		this._runtime.sendEvent('stopOnStep')
 		// step over
 		await this.sendNextRequest(response, args, 'step_over')
 	}
 
 	protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
 		console.log('stepBackRequest')
-		this._runtime.step(true);
+		// this._runtime.step(true);
+		this._runtime.sendEvent('stopOnStep')
 		this.sendResponse(response);
 	}
 
@@ -441,18 +448,15 @@ export class TraceDebugSession extends LoggingDebugSession {
 
 	protected async stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments) {
 		console.log('stepInRequest')
-		this._runtime.stepIn(args.targetId);
+		// this._runtime.stepIn(args.targetId);
+		this._runtime.sendEvent('stopOnStep')
 		await this.sendNextRequest(response, args, 'step_in')
 	}
 
-	// TODO
-	private currentTraceId: string = 'test'
-	private currentSpanId: string = '396dd782-0534-46ff-9197-2c8d17294a13'
-	private currentSeqInSpan: Number = 0
-
 	protected async stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments) {
 		console.log('stepOutRequest')
-		this._runtime.stepOut();
+		// this._runtime.stepOut();
+		this._runtime.sendEvent('stopOnStep')
 		await this.sendNextRequest(response, args, 'step_out')
 	}
 

@@ -359,7 +359,7 @@ export class TraceRuntime extends EventEmitter {
 		return false;
 	}
 
-	private sendEvent(event: string, ... args: any[]) {
+	public sendEvent(event: string, ... args: any[]) {
 		setImmediate(_ => {
 			this.emit(event, ...args);
 		});
