@@ -52,7 +52,7 @@
 		},
 		{
 			"name": "Trace Debug",
-			"type": "mock",
+			"type": "tracedebug",
 			"request": "launch",
 			"program": "${workspaceFolder}/${command:AskForProgramName}",
 			"stopOnEntry": true

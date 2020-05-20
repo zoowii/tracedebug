@@ -24,12 +24,12 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 
-	// register a configuration provider for 'mock' debug type
+	// register a configuration provider for 'tracedebug' debug type
 	const provider = new MockConfigurationProvider();
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('mock', provider));
+	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('tracedebug', provider));
 
-	// register a dynamic configuration provider for 'mock' debug type
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('mock', {
+	// register a dynamic configuration provider for 'tracedebug' debug type
+	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('tracedebug', {
 		provideDebugConfigurations(folder: WorkspaceFolder | undefined): ProviderResult<DebugConfiguration[]> {
 			return [
 				{
@@ -104,8 +104,10 @@ class MockConfigurationProvider implements vscode.DebugConfigurationProvider {
 		// if launch.json is missing or empty
 		if (!config.type && !config.request && !config.name) {
 			const editor = vscode.window.activeTextEditor;
-			if (editor && editor.document.languageId === 'markdown') {
-				config.type = 'mock';
+			const editorLang = editor && editor.document.languageId
+			// TODO: support all source files
+			if (editor && (editorLang === 'java' || editorLang==='markdown' || editorLang === 'javascript')) {
+				config.type = 'tracedebug';
 				config.name = 'Launch';
 				config.request = 'launch';
 				config.program = '${file}';
