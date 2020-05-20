@@ -12,6 +12,7 @@ import {
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
 import { TraceRuntime, MockBreakpoint } from './traceRuntime';
+import { TraceRpcClient } from './traceRpcClient';
 // import * as http from 'http';
 const rp = require('request-promise');
 const { Subject } = require('await-notify');
@@ -230,6 +231,8 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
+	private rpcClient: TraceRpcClient = new TraceRpcClient();
+
 	protected async stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments) {
 		console.log('stackTraceRequest')
 		// const startFrame = typeof args.startFrame === 'number' ? args.startFrame : 0;
@@ -252,16 +255,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		// TODO: get stack frames of span from api server
 		const spanId = this.currentSpanId
 		const seqInSpan = this.currentSeqInSpan
-		const url = `http://localhost:8280/tracedebug/api/trace/stack_trace/span`
-		const res = await rp({
-			method: 'POST',
-			url: url,
-			json: true,
-			body: {
-				spanId: spanId,
-				seqInSpan: seqInSpan
-			}
-		})
+		const res = await this.rpcClient.getSpanStackTrace(spanId, seqInSpan);
 		console.log('view span stack trace response', res)
 		const stackFrames: Array<StackFrame> = []
 		for(let i=0;i<res.length;i++) {
@@ -329,19 +323,9 @@ export class TraceDebugSession extends LoggingDebugSession {
 			const id = this._variableHandles.get(args.variablesReference);
 
 			// TODO: get variables from api
-			// const traceId = 'test'
 			const spanId = this.currentSpanId
 			const seqInSpan = this.currentSeqInSpan
-			const url = 'http://localhost:8280/tracedebug/api/trace/view_stack_variables/span'
-			const reqData = {
-				spanId, seqInSpan
-			}
-			const res = await rp({
-				method: 'POST',
-				url: url,
-				body: reqData,
-				json: true
-			})
+			const res = await this.rpcClient.getStackVariables(spanId, seqInSpan)
 			console.log('view stack variables res', res)
 			const variableValues = res.variableValues
 			for(const item of variableValues) {
@@ -415,29 +399,17 @@ export class TraceDebugSession extends LoggingDebugSession {
 
 		if(!this.currentSpanId) {
 			console.log('trace ended')
-			this.sendEvent(new StoppedEvent('trace end', TraceDebugSession.THREAD_ID))
+			this.sendEvent(new TerminatedEvent())
 			return
 		}
-		const url = `http://localhost:8280/tracedebug/api/trace/next_step_span_seq`
-		const reqData = {
-			breakpoints: [],
-			traceId: this.currentTraceId,
-			currentSpanId: this.currentSpanId,
-			currentSeqInSpan: this.currentSeqInSpan,
-			stepType: stepType
-		}
-		const res = await rp({
-			method: 'POST',
-			url: url,
-			body: reqData,
-			json: true
-		})
+		const breakpoints = []
+		const res = await this.rpcClient.getNextRequest(this.currentSpanId, this.currentSeqInSpan, stepType, breakpoints)
 		console.log('next step span response', res)
 		if(!res || !res.spanId) {
 			this.currentSpanId = null
 			this.currentSeqInSpan = null
 			console.log('end trace')
-			this.sendEvent(new StoppedEvent('trace end', TraceDebugSession.THREAD_ID))
+			this.sendEvent(new TerminatedEvent())
 			return
 			// TODO: end
 		}

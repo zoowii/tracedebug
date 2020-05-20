@@ -50,9 +50,9 @@ public class TraceSpanService {
             return spanStackTraceEntities;
         }
         if(seqInSpan != null) {
-            List<SpanDumpItemEntity> spanDumpItemEntities = spanDumpItemRepository.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(spanId, seqInSpan);
-            if(!spanDumpItemEntities.isEmpty()) {
-                spanStackTraceEntities.get(0).setLine(spanDumpItemEntities.get(0).getLine());
+            SpanDumpItemEntity spanDumpItemEntity = spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
+            if(spanDumpItemEntity != null) {
+                spanStackTraceEntities.get(0).setLine(spanDumpItemEntity.getLine());
             }
         }
         return spanStackTraceEntities;
