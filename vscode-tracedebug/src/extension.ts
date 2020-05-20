@@ -73,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 			break;
 		}
 
-	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('mock', factory));
+	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('tracedebug', factory));
 	if ('dispose' in factory) {
 		context.subscriptions.push(factory);
 	}
