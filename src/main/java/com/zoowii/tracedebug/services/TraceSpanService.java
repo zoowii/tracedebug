@@ -44,8 +44,18 @@ public class TraceSpanService {
         return traceSpanRepository.findBySpanId(spanId);
     }
 
-    public List<SpanStackTraceEntity> listSpanStackTrace(String spanId) {
-        return spanStackTraceRepository.findAllBySpanIdOrderByStackIndexAsc(spanId);
+    public List<SpanStackTraceEntity> listSpanStackTrace(String spanId, Integer seqInSpan) {
+        List<SpanStackTraceEntity> spanStackTraceEntities = spanStackTraceRepository.findAllBySpanIdOrderByStackIndexAsc(spanId);
+        if(spanStackTraceEntities.isEmpty()) {
+            return spanStackTraceEntities;
+        }
+        if(seqInSpan != null) {
+            List<SpanDumpItemEntity> spanDumpItemEntities = spanDumpItemRepository.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(spanId, seqInSpan);
+            if(!spanDumpItemEntities.isEmpty()) {
+                spanStackTraceEntities.get(0).setLine(spanDumpItemEntities.get(0).getLine());
+            }
+        }
+        return spanStackTraceEntities;
     }
 
     public List<SpanDumpItemEntity> listSpanDumpItems(String spanId) {
@@ -54,6 +64,10 @@ public class TraceSpanService {
 
     public List<SpanDumpItemEntity> findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(String spanId, int seqInSpan) {
         return spanDumpItemRepository.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(spanId, seqInSpan);
+    }
+
+    public SpanDumpItemEntity findFirstBySpanIdAndSeqInSpan(String spanId, int seqInSpan) {
+        return spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
     }
 
     /**

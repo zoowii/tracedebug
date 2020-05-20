@@ -1,9 +1,6 @@
 package com.zoowii.tracedebug.controllers;
 
-import com.zoowii.tracedebug.controllers.vo.NextRequestResponseVo;
-import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
-import com.zoowii.tracedebug.controllers.vo.StepStackForm;
-import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
+import com.zoowii.tracedebug.controllers.vo.*;
 import com.zoowii.tracedebug.exceptions.SpanNotFoundException;
 import com.zoowii.tracedebug.http.BeanPage;
 import com.zoowii.tracedebug.http.BeanPaginator;
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -27,6 +25,7 @@ public class TraceController {
 
     @PostMapping("/list")
     public @ResponseBody Object listTraces(@RequestBody BeanPaginator paginator) {
+        log.info("listTraces form {}", paginator);
         BeanPage<String> traceIdsPage = traceSpanService.listTraceIds(paginator);
         return traceIdsPage;
     }
@@ -43,9 +42,10 @@ public class TraceController {
         return traceSpanEntity;
     }
 
-    @GetMapping("/stack_trace/span/{spanId}")
-    public @ResponseBody Object getSpanStackTrace(@PathVariable("spanId") String spanId) {
-        List<SpanStackTraceEntity> spanStackTraceEntities = traceSpanService.listSpanStackTrace(spanId);
+    @PostMapping("/stack_trace/span")
+    public @ResponseBody Object getSpanStackTrace(@RequestBody ViewStackTraceForm form) {
+        log.info("getSpanStackTrace form {}", form);
+        List<SpanStackTraceEntity> spanStackTraceEntities = traceSpanService.listSpanStackTrace(form.getSpanId(), form.getSeqInSpan());
         return spanStackTraceEntities;
     }
 
@@ -94,8 +94,15 @@ public class TraceController {
                     continue; // step out 需要跳出当前span
                 }
                 // 只取这个span中比currentSeqInSpan大的项，然后根据stepType和stackDepth处理
+                SpanDumpItemEntity currentSpanDumpItem = traceSpanService.findFirstBySpanIdAndSeqInSpan(currentSpanId, currentSeqInSpan);
+                if(currentSpanDumpItem == null) {
+                    continue;
+                }
                 List<SpanDumpItemEntity> spanDumpItemEntities = traceSpanService.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(
                         spanEntity.getSpanId(), currentSeqInSpan);
+                spanDumpItemEntities = spanDumpItemEntities.stream()
+                        .filter(x -> !(x.getLine().equals(currentSpanDumpItem.getLine())))
+                        .collect(Collectors.toList()); // 排除同一行的代码. TODO: 目前同一行会因为注入多个变量而有多个dump
                 if(!spanDumpItemEntities.isEmpty()) {
                     // 断点调试的下一个暂停点
                     return new NextRequestResponseVo(traceId, spanEntity.getSpanId(),

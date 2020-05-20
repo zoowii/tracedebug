@@ -8,4 +8,5 @@ import java.util.List;
 public interface SpanDumpItemRepository extends CrudRepository<SpanDumpItemEntity, Long> {
     List<SpanDumpItemEntity> findAllBySpanIdOrderBySeqInSpan(String spanId);
     List<SpanDumpItemEntity> findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(String spanId, int seqInSpan);
+    SpanDumpItemEntity findFirstBySpanIdAndSeqInSpanOrderByIdAsc(String spanId, int seqInSpan);
 }

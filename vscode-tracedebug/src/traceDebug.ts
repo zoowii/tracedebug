@@ -231,7 +231,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 	}
 
 	protected async stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments) {
-
+		console.log('stackTraceRequest')
 		// const startFrame = typeof args.startFrame === 'number' ? args.startFrame : 0;
 		// const maxLevels = typeof args.levels === 'number' ? args.levels : 1000;
 		// const endFrame = startFrame + maxLevels;
@@ -251,11 +251,16 @@ export class TraceDebugSession extends LoggingDebugSession {
 
 		// TODO: get stack frames of span from api server
 		const spanId = this.currentSpanId
-		const url = `http://localhost:8280/tracedebug/api/trace/stack_trace/span/${spanId}`
+		const seqInSpan = this.currentSeqInSpan
+		const url = `http://localhost:8280/tracedebug/api/trace/stack_trace/span`
 		const res = await rp({
-			method: 'GET',
+			method: 'POST',
 			url: url,
-			json: true
+			json: true,
+			body: {
+				spanId: spanId,
+				seqInSpan: seqInSpan
+			}
 		})
 		console.log('view span stack trace response', res)
 		const stackFrames: Array<StackFrame> = []
@@ -264,7 +269,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 			// TODO: change from classname + moduleId to source file path
 			let filename = item.classname;
 			filename = `E:/projects/cglibdemo/src/main/java/cglibdemo/Dao.java`;
-			const sf = new StackFrame(i, item.methodName, this.createSource(filename), this.convertDebuggerLineToClient(item.line));
+			const sf = new StackFrame(i, item.methodName, this.createSource(filename), this.convertDebuggerLineToClient((item.line || 1) - 1));
 			if (typeof item.column === 'number') {
 				sf.column = this.convertDebuggerColumnToClient(item.column);
 			}
@@ -276,6 +281,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		};
 
 		this.sendResponse(response);
+		console.log('stackTraceRequest done')
 	}
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
@@ -290,8 +296,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 	}
 
 	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, request?: DebugProtocol.Request) {
-
-		logger.log('variablesRequest request ' + request)
+		console.log('variablesRequest request ' + request)
 
 		const variables: DebugProtocol.Variable[] = [];
 
@@ -394,9 +399,9 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
-	protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
+	protected async continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments) {
 		this._runtime.continue();
-		this.sendResponse(response);
+		await this.sendNextRequest(response, args, 'continue')
 	}
 
 	protected reverseContinueRequest(response: DebugProtocol.ReverseContinueResponse, args: DebugProtocol.ReverseContinueArguments) : void {
@@ -404,17 +409,16 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	 }
 
-	protected async nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments) {
-		this._runtime.step();
-		// TODO: step over
-
+	 private async sendNextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments, stepType: string) {
+		// TODO
+		this.sendResponse(response);
 		const url = `http://localhost:8280/tracedebug/api/trace/next_step_span_seq`
 		const reqData = {
 			breakpoints: [],
 			traceId: this.currentTraceId,
 			currentSpanId: this.currentSpanId,
 			currentSeqInSpan: this.currentSeqInSpan,
-			stepType: 'step_out'
+			stepType: stepType
 		}
 		const res = await rp({
 			method: 'POST',
@@ -423,15 +427,32 @@ export class TraceDebugSession extends LoggingDebugSession {
 			json: true
 		})
 		console.log('next step span response', res)
-		this.sendResponse(response);
+		if(!res) {
+			this.currentSpanId = null
+			this.currentSeqInSpan = null
+			console.log('end trace')
+			return
+			// TODO: end
+		}
+		this.currentSpanId = res.spanId
+		this.currentSeqInSpan = res.seqInSpan
+		console.log('current spanId ' + this.currentSpanId + " seqInSpan " + this.currentSeqInSpan)
+	 }
+
+	protected async nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments) {
+		this._runtime.step();
+		// step over
+		await this.sendNextRequest(response, args, 'step_over')
 	}
 
 	protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
+		console.log('stepBackRequest')
 		this._runtime.step(true);
 		this.sendResponse(response);
 	}
 
 	protected stepInTargetsRequest(response: DebugProtocol.StepInTargetsResponse, args: DebugProtocol.StepInTargetsArguments) {
+		console.log('stepInTargetsRequest')
 		const targets = this._runtime.getStepInTargets(args.frameId);
 		response.body = {
 			targets: targets.map(t => { return { id: t.id, label: t.label }} )
@@ -439,10 +460,10 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
-	protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
+	protected async stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments) {
+		console.log('stepInRequest')
 		this._runtime.stepIn(args.targetId);
-		// TODO: step in
-		this.sendResponse(response);
+		await this.sendNextRequest(response, args, 'step_in')
 	}
 
 	// TODO
@@ -450,14 +471,14 @@ export class TraceDebugSession extends LoggingDebugSession {
 	private currentSpanId: string = '268fa437-1c22-4fb9-9d54-1f82a70e36e7'
 	private currentSeqInSpan: Number = 0
 
-	protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
+	protected async stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments) {
+		console.log('stepOutRequest')
 		this._runtime.stepOut();
-		// TODO: step out
-		this.sendResponse(response);
+		await this.sendNextRequest(response, args, 'step_out')
 	}
 
 	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
-
+		console.log('evaluateRequest')
 		let reply: string | undefined = undefined;
 
 		if (args.context === 'repl') {
