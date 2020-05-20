@@ -281,7 +281,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		};
 
 		this.sendResponse(response);
-		console.log('stackTraceRequest done')
+		// console.log('stackTraceRequest done')
 	}
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
@@ -412,6 +412,12 @@ export class TraceDebugSession extends LoggingDebugSession {
 	 private async sendNextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments, stepType: string) {
 		// TODO
 		this.sendResponse(response);
+
+		if(!this.currentSpanId) {
+			console.log('trace ended')
+			this.sendEvent(new StoppedEvent('trace end', TraceDebugSession.THREAD_ID))
+			return
+		}
 		const url = `http://localhost:8280/tracedebug/api/trace/next_step_span_seq`
 		const reqData = {
 			breakpoints: [],
@@ -427,10 +433,11 @@ export class TraceDebugSession extends LoggingDebugSession {
 			json: true
 		})
 		console.log('next step span response', res)
-		if(!res) {
+		if(!res || !res.spanId) {
 			this.currentSpanId = null
 			this.currentSeqInSpan = null
 			console.log('end trace')
+			this.sendEvent(new StoppedEvent('trace end', TraceDebugSession.THREAD_ID))
 			return
 			// TODO: end
 		}
