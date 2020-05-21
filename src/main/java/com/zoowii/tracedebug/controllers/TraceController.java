@@ -110,9 +110,7 @@ public class TraceController {
                 }
                 List<SpanDumpItemEntity> spanDumpItemEntities = traceSpanService.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(
                         spanEntity.getSpanId(), currentSeqInSpan);
-                spanDumpItemEntities = spanDumpItemEntities.stream()
-                        .filter(x -> !(x.getLine().equals(currentSpanDumpItem.getLine())))
-                        .collect(Collectors.toList()); // 排除同一行的代码. TODO: 目前同一行会因为注入多个变量而有多个dump
+                // TODO: 排除掉同一批dump但是dump的是不同变量的情况（这种情况应该在上报时就用同一个seqInSpan)
                 if(!spanDumpItemEntities.isEmpty()) {
                     // 断点调试的下一个暂停点
                     return new NextRequestResponseVo(traceId, spanEntity.getSpanId(),

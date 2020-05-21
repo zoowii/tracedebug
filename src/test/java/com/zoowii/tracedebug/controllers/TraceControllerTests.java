@@ -33,8 +33,8 @@ public class TraceControllerTests {
     @Test
     public void testNextRequest() {
         StepStackForm form = new StepStackForm();
-        form.setCurrentSpanId("574e1fe0-acd0-4f19-8262-d094416ac08f");
-        form.setCurrentSeqInSpan(7);
+        form.setCurrentSpanId("3e94110f-e818-4558-81de-0e3bca29b31a");
+        form.setCurrentSeqInSpan(3);
         form.setStepType("step_over");
         form.setBreakpoints(new ArrayList<>());
         NextRequestResponseVo response = restTemplate.postForObject(
