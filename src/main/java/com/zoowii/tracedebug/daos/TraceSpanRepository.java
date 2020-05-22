@@ -16,7 +16,7 @@ public interface TraceSpanRepository extends CrudRepository<TraceSpanEntity, Lon
 
     TraceSpanEntity findFirstByTraceIdOrderByIdAsc(String traceId);
 
-    @Query("select distinct t.traceId from TraceSpanEntity t order by t.id desc")
+    @Query("select distinct t.traceId from TraceSpanEntity t")
     List<String> findAllDistinctTraceIds(@Param("offset") long offset, @Param("limit") int limit);
 
     @Query("select count(distinct t.traceId) from TraceSpanEntity t")

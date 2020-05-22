@@ -25,14 +25,14 @@ public class TraceController {
     private TraceSpanService traceSpanService;
 
     @PostMapping("/list")
-    public @ResponseBody Object listTraces(@RequestBody BeanPaginator paginator) {
+    public @ResponseBody BeanPage<String> listTraces(@RequestBody BeanPaginator paginator) {
         log.info("listTraces form {}", paginator);
         BeanPage<String> traceIdsPage = traceSpanService.listTraceIds(paginator);
         return traceIdsPage;
     }
 
     @GetMapping("/list_spans/{traceId}")
-    public @ResponseBody Object listTraceSpans(@PathVariable("traceId") String traceId) {
+    public @ResponseBody List<TraceSpanEntity> listTraceSpans(@PathVariable("traceId") String traceId) {
         List<TraceSpanEntity> spanEntities = traceSpanService.findAllByTraceIdOrderByIdAsc(traceId);
         return spanEntities;
     }

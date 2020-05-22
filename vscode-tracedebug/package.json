@@ -57,7 +57,8 @@
 		"onDebug",
 		"onDebugDynamicConfigurations:mock",
 		"onCommand:extension.trace-debug.getProgramName",
-		"onCommand:traceDebug.setTraceId"
+		"onCommand:traceDebug.setTraceId",
+		"onView:traceNodes"
 	],
 	"contributes": {
 		"breakpoints": [
@@ -127,6 +128,23 @@
 					"AskForProgramName": "extension.trace-debug.getProgramName"
 				}
 			}
-		]
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "trace-explorer",
+					"title": "Trace Explorer",
+					"icon": "images/dep.svg"
+				}
+			]
+		},
+		"views": {
+			"trace-explorer": [
+				{
+					"id": "traceNodes",
+					"name": "Trace Nodes"
+				}
+			]
+		}
 	}
 }

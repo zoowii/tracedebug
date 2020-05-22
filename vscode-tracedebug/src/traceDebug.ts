@@ -12,7 +12,7 @@ import {
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
 import { TraceRuntime, MockBreakpoint } from './traceRuntime';
-import { TraceRpcClient, getCurrentTraceId } from './traceRpcClient';
+import { TraceRpcClient, getCurrentTraceId, getCurrentSpanId } from './traceRpcClient';
 // import * as http from 'http';
 const rp = require('request-promise');
 const { Subject } = require('await-notify');
@@ -171,7 +171,8 @@ export class TraceDebugSession extends LoggingDebugSession {
 	protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
 
 		this.currentTraceId = getCurrentTraceId();
-		console.log('current traceId set to ' + this.currentTraceId)
+		this.currentSpanId = getCurrentSpanId();
+		console.log('current traceId, spanId set to ' + this.currentTraceId + ', ' + this.currentSpanId)
 
 		const firstSpanRes = await this.rpcClient.getNextRequest(this.currentTraceId, undefined, undefined, 'step_over', [])
 		if(firstSpanRes) {

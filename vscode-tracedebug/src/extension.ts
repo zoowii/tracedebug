@@ -9,6 +9,7 @@ import { WorkspaceFolder, DebugConfiguration, ProviderResult, CancellationToken 
 import { TraceDebugSession } from './traceDebug';
 import { setCurrentTraceId } from './traceRpcClient';
 import * as Net from 'net';
+import { TraceNodeProvider } from './traceExplorer';
 
 /*
  * The compile time flag 'runMode' controls how the debug adapter is run.
@@ -25,13 +26,13 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('traceDebug.setTraceId', (traceId: string='') => {
+	context.subscriptions.push(vscode.commands.registerCommand('traceDebug.setTraceId', (traceId: string = '') => {
 		vscode.window.showInputBox({
 			placeHolder: "Please enter the traceId you want to debugger",
 			value: ''
 		}).then((traceId: string) => {
 			console.log('receive traceId ' + traceId)
-			if(!traceId) {
+			if (!traceId) {
 				console.log('empty trace id')
 				// TODO: show alert to notify
 				return
@@ -88,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// run the debug adapter as a separate process
 			factory = new DebugAdapterExecutableFactory();
 			break;
-		}
+	}
 
 	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('tracedebug', factory));
 	if ('dispose' in factory) {
@@ -104,6 +105,19 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 	*/
+
+	// 左侧活动试图增加一个trace list view
+	const traceNodeProvider = new TraceNodeProvider();
+	vscode.window.registerTreeDataProvider('traceNodes', traceNodeProvider);
+	vscode.commands.registerCommand('traceNodes.refreshList', () => traceNodeProvider.refresh());
+	vscode.commands.registerCommand('extension.openTraceAndSpan', spanItem => {
+		console.log('on click span', spanItem)
+		if(spanItem && spanItem.traceId) {
+			setCurrentTraceId(spanItem.traceId, spanItem.spanId)
+			// toast通知用户已经设置了待调试的traceId
+			vscode.window.showInformationMessage('traceId to debugger is set');
+		}
+	});
 }
 
 export function deactivate() {
@@ -123,7 +137,7 @@ class MockConfigurationProvider implements vscode.DebugConfigurationProvider {
 			const editor = vscode.window.activeTextEditor;
 			const editorLang = editor && editor.document.languageId
 			// TODO: support all source files
-			if (editor && (editorLang === 'java' || editorLang==='markdown' || editorLang === 'javascript')) {
+			if (editor && (editorLang === 'java' || editorLang === 'markdown' || editorLang === 'javascript')) {
 				config.type = 'tracedebug';
 				config.name = 'Launch';
 				config.request = 'launch';
