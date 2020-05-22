@@ -35,9 +35,10 @@ public class TraceSpanService {
     }
 
     public BeanPage<String> listTraceIds(BeanPaginator paginator) {
-        List<String> items = traceSpanRepository.findAllDistinctTraceIds(paginator.getOffset(), paginator.getLimit());
+        List<Map<String, Object>> items = traceSpanRepository.findAllDistinctTraceIds(paginator.getOffset(), paginator.getLimit());
+        List<String> traceIds = items.stream().map(x->x.get("trace_id").toString()).collect(Collectors.toList());
         long total = traceSpanRepository.countDistinctTraceIds();
-        return new BeanPage<>(items, total);
+        return new BeanPage<>(traceIds, total);
     }
 
     public TraceSpanEntity findSpanBySpanId(String spanId) {

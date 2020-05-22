@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TraceSpanRepository extends CrudRepository<TraceSpanEntity, Long> {
 
@@ -16,8 +17,9 @@ public interface TraceSpanRepository extends CrudRepository<TraceSpanEntity, Lon
 
     TraceSpanEntity findFirstByTraceIdOrderByIdAsc(String traceId);
 
-    @Query("select distinct t.traceId from TraceSpanEntity t")
-    List<String> findAllDistinctTraceIds(@Param("offset") long offset, @Param("limit") int limit);
+    //  limit #{offset}, #{limit}
+    @Query(value = "select max(id) as id, trace_id from trace_span group by trace_id order by id desc", nativeQuery = true)
+    List<Map<String, Object>> findAllDistinctTraceIds(@Param("offset") long offset, @Param("limit") int limit);
 
     @Query("select count(distinct t.traceId) from TraceSpanEntity t")
     long countDistinctTraceIds();
