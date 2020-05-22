@@ -70,7 +70,7 @@ export class TraceRpcClient {
 	}
 	resolveFilename(moduleId: string, classname: string, filename: string): string {
 		// E:/projects // C:/Users/zoowii
-		return `C:/Users/zoowii/projects/cglibdemo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
+		return `C:/Users/zoowii/projects/tracedebug/jtraceinject_demo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
 	}
 }
 

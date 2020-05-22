@@ -24,6 +24,105 @@ public class TraceController {
     @Resource
     private TraceSpanService traceSpanService;
 
+    /**
+     * 开启新span时上报接口
+     * @return
+     */
+    @GetMapping("/span_start/{traceId}/{spanId}")
+    public @ResponseBody Object startNewSpan(
+            @PathVariable("traceId") String traceId,
+            @PathVariable("spanId") String spanId,
+            @RequestParam("stack_depth") Integer stackDepth,
+            @RequestParam("moduleId") String moduleId,
+            @RequestParam("classname") String classname,
+            @RequestParam("method") String methodName) {
+        log.info("startNewSpan called");
+        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
+            return "empty traceId or spanId";
+        }
+        TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(spanId);
+        if(traceSpanEntity != null) {
+            return "duplicate spanId";
+        }
+        traceSpanEntity = new TraceSpanEntity();
+        traceSpanEntity.setTraceId(traceId);
+        traceSpanEntity.setSpanId(spanId);
+        traceSpanEntity.setStackDepth(stackDepth!=null?stackDepth:0);
+        traceSpanEntity.setModuleId(moduleId!=null?moduleId:"");
+        traceSpanEntity.setClassname(classname!=null?classname:"");
+        traceSpanEntity.setMethodName(methodName!=null?methodName:"");
+
+        traceSpanEntity = traceSpanService.saveTraceSpan(traceSpanEntity);
+
+        return traceSpanEntity;
+    }
+
+    /**
+     * 某个span开启时的stack trace element的上报，每次只上报一项
+     */
+    @GetMapping("/add_span_stack_trace_element")
+    public @ResponseBody Object addSpanStackTraceElement(
+            @RequestParam("trace_id") String traceId,
+            @RequestParam("span_id") String spanId,
+            @RequestParam("stack_index") Integer stackIndex,
+            @RequestParam("module_id") String moduleId,
+            @RequestParam("classname") String classname,
+            @RequestParam("method") String methodName,
+            @RequestParam("line") Integer lineNumber,
+            @RequestParam("filename") String filename
+    ) {
+        log.info("addSpanStackTraceElement called");
+        // 保持幂等性避免(spanId, stackIndex)重复插入
+        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
+            return "empty traceId or spanId";
+        }
+        SpanStackTraceEntity spanStackTraceEntity = traceSpanService.findSpanStackTraceBySpanIdAndStackIndex(spanId, stackIndex);
+        if(spanStackTraceEntity!=null) {
+            return "duplicate spanId and stackIndex";
+        }
+        spanStackTraceEntity = new SpanStackTraceEntity();
+        spanStackTraceEntity.setTraceId(traceId);
+        spanStackTraceEntity.setSpanId(spanId);
+        spanStackTraceEntity.setStackIndex(stackIndex!=null?stackIndex:-1);
+        spanStackTraceEntity.setModuleId(moduleId!=null?moduleId:"");
+        spanStackTraceEntity.setClassname(classname!=null?classname:"");
+        spanStackTraceEntity.setMethodName(methodName!=null?methodName:"");
+        spanStackTraceEntity.setLine(lineNumber);
+        spanStackTraceEntity.setFilename(filename);
+        spanStackTraceEntity = traceSpanService.saveSpanStackTrace(spanStackTraceEntity);
+
+        return spanStackTraceEntity;
+    }
+
+    /**
+     * 某个span dump某个符号的值的上报接口
+     */
+    @GetMapping("/span_dump/{spanId}")
+    public @ResponseBody Object dumpVarInSpan(
+            @PathVariable("spanId") String spanId,
+            @RequestParam("seq_in_span") Integer seqInSpan,
+            @RequestParam("name") String name,
+            @RequestParam("value") String value,
+            @RequestParam("line") Integer line) {
+        log.info("dumpVarInSpan called");
+        if(StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
+            return "empty spanId or name";
+        }
+        TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(spanId);
+        if(traceSpanEntity==null) {
+            return "can't find spanId " + spanId;
+        }
+        SpanDumpItemEntity spanDumpItemEntity = new SpanDumpItemEntity();
+        spanDumpItemEntity.setTraceId(traceSpanEntity.getTraceId());
+        spanDumpItemEntity.setSpanId(spanId);
+        spanDumpItemEntity.setSeqInSpan(seqInSpan);
+        spanDumpItemEntity.setName(name);
+        spanDumpItemEntity.setValue(value);
+        spanDumpItemEntity.setLine(line);
+        spanDumpItemEntity = traceSpanService.saveSpanDumpItem(spanDumpItemEntity);
+        return spanDumpItemEntity;
+    }
+
     @PostMapping("/list")
     public @ResponseBody BeanPage<String> listTraces(@RequestBody BeanPaginator paginator) {
         log.info("listTraces form {}", paginator);

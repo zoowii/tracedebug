@@ -97,4 +97,20 @@ public class TraceSpanService {
         return stackVarSnapshot;
     }
 
+    public TraceSpanEntity saveTraceSpan(TraceSpanEntity record) {
+        return traceSpanRepository.save(record);
+    }
+
+    public SpanStackTraceEntity saveSpanStackTrace(SpanStackTraceEntity record) {
+        return spanStackTraceRepository.save(record);
+    }
+
+    public SpanDumpItemEntity saveSpanDumpItem(SpanDumpItemEntity record) {
+        return spanDumpItemRepository.save(record);
+    }
+
+    public SpanStackTraceEntity findSpanStackTraceBySpanIdAndStackIndex(String spanId, Integer stackIndex) {
+        return spanStackTraceRepository.findFirstBySpanIdAndStackIndex(spanId, stackIndex);
+    }
+
 }

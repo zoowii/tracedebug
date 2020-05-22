@@ -75,7 +75,8 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
             Connection conn = dataSource.getConnection();
             try {
                 {
-                    PreparedStatement pstm = conn.prepareStatement("insert into trace_span (trace_id, span_id, module_id, classname, method_name, stack_depth)" +
+                    PreparedStatement pstm = conn.prepareStatement("insert into trace_span" +
+                            " (trace_id, span_id, module_id, classname, method_name, stack_depth)" +
                             " values (?, ?, ?, ?, ?, ?)");
                     try {
                         pstm.setString(1, traceId);
@@ -98,8 +99,10 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
                     }
                     StackTraceElement stackTraceElement = stackTrace.get(i);
 
-                    PreparedStatement pstm = conn.prepareStatement("insert into span_stack_trace (trace_id, span_id," +
-                            " stack_index, module_id, classname, method_name, line, filename) values (?, ?, ?, ?, ?, ?, ?, ?)");
+                    PreparedStatement pstm = conn.prepareStatement("insert into span_stack_trace" +
+                            " (trace_id, span_id," +
+                            " stack_index, module_id, classname, method_name, line, filename)" +
+                            " values (?, ?, ?, ?, ?, ?, ?, ?)");
                     try {
                         pstm.setString(1, traceId);
                         pstm.setString(2, spanId);
