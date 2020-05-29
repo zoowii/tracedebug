@@ -69,6 +69,7 @@ export class TraceRpcClient {
 		return res
 	}
 	resolveFilename(moduleId: string, classname: string, filename: string): string {
+		// TODO: 从当前目录加载模块映射文件，没找到就提示用户创建
 		// E:/projects // C:/Users/zoowii
 		return `C:/Users/zoowii/projects/tracedebug/jtraceinject_demo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
 	}

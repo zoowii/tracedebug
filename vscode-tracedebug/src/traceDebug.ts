@@ -13,8 +13,6 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
 import { TraceRuntime, MockBreakpoint } from './traceRuntime';
 import { TraceRpcClient, getCurrentTraceId, getCurrentSpanId } from './traceRpcClient';
-// import * as http from 'http';
-const rp = require('request-promise');
 const { Subject } = require('await-notify');
 
 function timeout(ms: number) {

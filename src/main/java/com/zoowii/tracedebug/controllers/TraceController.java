@@ -33,7 +33,7 @@ public class TraceController {
             @PathVariable("traceId") String traceId,
             @PathVariable("spanId") String spanId,
             @RequestParam("stack_depth") Integer stackDepth,
-            @RequestParam("moduleId") String moduleId,
+            @RequestParam("module_id") String moduleId,
             @RequestParam("classname") String classname,
             @RequestParam("method") String methodName) {
         log.info("startNewSpan called");
