@@ -97,23 +97,20 @@ public class TraceController {
     /**
      * 某个span dump某个符号的值的上报接口
      */
-    @GetMapping("/span_dump/{spanId}")
+    @GetMapping("/span_dump")
     public @ResponseBody Object dumpVarInSpan(
-            @PathVariable("spanId") String spanId,
+            @RequestParam("trace_id") String traceId,
+            @RequestParam("span_id") String spanId,
             @RequestParam("seq_in_span") Integer seqInSpan,
             @RequestParam("name") String name,
             @RequestParam("value") String value,
             @RequestParam("line") Integer line) {
         log.info("dumpVarInSpan called");
-        if(StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
-            return "empty spanId or name";
-        }
-        TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(spanId);
-        if(traceSpanEntity==null) {
-            return "can't find spanId " + spanId;
+        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
+            return "empty traceId or spanId or name";
         }
         SpanDumpItemEntity spanDumpItemEntity = new SpanDumpItemEntity();
-        spanDumpItemEntity.setTraceId(traceSpanEntity.getTraceId());
+        spanDumpItemEntity.setTraceId(traceId);
         spanDumpItemEntity.setSpanId(spanId);
         spanDumpItemEntity.setSeqInSpan(seqInSpan);
         spanDumpItemEntity.setName(name);

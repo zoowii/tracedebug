@@ -71,6 +71,9 @@ export class TraceRpcClient {
 	resolveFilename(moduleId: string, classname: string, filename: string): string {
 		// TODO: 从当前目录加载模块映射文件，没找到就提示用户创建
 		// E:/projects // C:/Users/zoowii
+		if(filename === 'example.js') {
+			return `C:/Users/zoowii/projects/tracedebug/trace_js/example.js`
+		}
 		return `C:/Users/zoowii/projects/tracedebug/jtraceinject_demo/src/main/java/cglibdemo/Dao.java` // TODO: 根据moduleId和classname, filename找出实际的源码位置
 	}
 }

@@ -51,11 +51,12 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
 
     private int maxStackTraceDepth = 5;
 
+    // TODO: traceStart的时候产生traceId
     String traceId = "test" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date()); // TODO
 
     @Override
     public void onSpanStart(String spanId, List<StackTraceElement> stackTrace, int stackDepth) {
-        System.out.println("span " + spanId + " started");
+        System.out.println("span " + spanId + " started in traceId " + traceId);
         // TODO: 从当前线程或者请求参数获取traceId(如果没有，返回)。记录spanId和traceId映射关系
         if (dataSource == null) {
             return;

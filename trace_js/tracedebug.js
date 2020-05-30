@@ -13,11 +13,12 @@
             return v.toString(16)
         })
     }
+
     let readyDone = false
     let jobListToDoAfterDocumentReader = []
     document.addEventListener('readystatechange', (event) => {
         readyDone = true
-        for(const job of jobListToDoAfterDocumentReader) {
+        for (const job of jobListToDoAfterDocumentReader) {
             try {
                 job()
             } catch (e) {
@@ -34,13 +35,14 @@
         const job = () => {
             const img = document.createElement('img')
             img.src = url
+            img.style = 'display: none'
             document.body.append(img)
             setTimeout(() => {
                 // 3秒后删除这个img，避免添加了太多无用的元素
                 img.remove()
             }, 3000)
         }
-        if(readyDone) {
+        if (readyDone) {
             job()
         } else {
             jobListToDoAfterDocumentReader.push(job)
@@ -118,7 +120,7 @@
         spanSeqGen[spanId] = seqInSpan + 1
         // 因为很多js文件是其他工具产生的，所以这种情况考虑在参数中传入filename和源码line(编译的过程传入)
         line = (line !== undefined) ? line : fileAndLine.line
-        callTraceApi(`/api/trace/span_dump/${spanId}?seq_in_span=${seqInSpan}&name=${varName}`
+        callTraceApi(`/api/trace/span_dump?trace_id=${traceId}&span_id=${spanId}&seq_in_span=${seqInSpan}&name=${varName}`
             + `&value=${value}&line=${line}`)
     }
     window.addSpanStackTrace = function (spanId, line) {

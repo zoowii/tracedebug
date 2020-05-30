@@ -11,9 +11,8 @@ public class StackDumper {
 
     static {
         ServiceLoader<IStackDumpProcessor> dumpProcessorServiceLoader = ServiceLoader.load(IStackDumpProcessor.class);
-        for (IStackDumpProcessor iStackDumpProcessor : dumpProcessorServiceLoader) {
+        for (IStackDumpProcessor processor : dumpProcessorServiceLoader) {
             try {
-                IStackDumpProcessor processor = iStackDumpProcessor;
                 dumpProcessors.add(processor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -42,7 +41,7 @@ public class StackDumper {
     // spanId中第几次调用的序列号
     // TODO: 超时或者结束的spanId从内存中删除
     private static ConcurrentHashMap<String, AtomicInteger> spanStepSeqs
-            = new ConcurrentHashMap<String, AtomicInteger>(); // spanId => sequence in span
+            = new ConcurrentHashMap<>(); // spanId => sequence in span
 
     /**
      * 判断一个栈帧是否是太深的框架内部的栈帧，或者是所有trace的方法都会有的很深的栈帧
@@ -70,7 +69,7 @@ public class StackDumper {
         if (!dumpProcessors.isEmpty()) {
             Thread t = Thread.currentThread();
             StackTraceElement[] rawStackTrace = t.getStackTrace();
-            List<StackTraceElement> stackTraceElements = new ArrayList<StackTraceElement>();
+            List<StackTraceElement> stackTraceElements = new ArrayList<>();
 
             // 因为深度限制，所以需要从某个stackTraceElement(className+methodName)作为顶层开始计算栈的深度
             for(StackTraceElement stackTraceElement : rawStackTrace) {

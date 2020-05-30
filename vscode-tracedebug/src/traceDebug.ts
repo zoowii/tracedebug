@@ -172,7 +172,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.currentSpanId = getCurrentSpanId();
 		console.log('current traceId, spanId set to ' + this.currentTraceId + ', ' + this.currentSpanId)
 
-		const firstSpanRes = await this.rpcClient.getNextRequest(this.currentTraceId, undefined, undefined, 'step_over', [])
+		const firstSpanRes = await this.rpcClient.getNextRequest(this.currentTraceId, this.currentSpanId, undefined, 'step_over', [])
 		if(firstSpanRes) {
 			console.log('firstSpanRes', firstSpanRes)
 			this.currentSpanId = firstSpanRes.spanId
