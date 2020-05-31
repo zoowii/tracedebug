@@ -1,5 +1,6 @@
 package com.zoowii.tracedebug.controllers;
 
+import com.zoowii.tracedebug.aspects.RequestLog;
 import com.zoowii.tracedebug.controllers.vo.*;
 import com.zoowii.tracedebug.exceptions.SpanNotFoundException;
 import com.zoowii.tracedebug.http.BeanPage;
@@ -28,6 +29,7 @@ public class TraceController {
      * 开启新span时上报接口
      * @return
      */
+    @RequestLog
     @GetMapping("/span_start/{traceId}/{spanId}")
     public @ResponseBody Object startNewSpan(
             @PathVariable("traceId") String traceId,
@@ -36,7 +38,6 @@ public class TraceController {
             @RequestParam("module_id") String moduleId,
             @RequestParam("classname") String classname,
             @RequestParam("method") String methodName) {
-        log.info("startNewSpan called");
         if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
             return "empty traceId or spanId";
         }
@@ -60,6 +61,7 @@ public class TraceController {
     /**
      * 某个span开启时的stack trace element的上报，每次只上报一项
      */
+    @RequestLog
     @GetMapping("/add_span_stack_trace_element")
     public @ResponseBody Object addSpanStackTraceElement(
             @RequestParam("trace_id") String traceId,
@@ -71,7 +73,6 @@ public class TraceController {
             @RequestParam("line") Integer lineNumber,
             @RequestParam("filename") String filename
     ) {
-        log.info("addSpanStackTraceElement called");
         // 保持幂等性避免(spanId, stackIndex)重复插入
         if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
             return "empty traceId or spanId";
@@ -97,6 +98,7 @@ public class TraceController {
     /**
      * 某个span dump某个符号的值的上报接口
      */
+    @RequestLog
     @GetMapping("/span_dump")
     public @ResponseBody Object dumpVarInSpan(
             @RequestParam("trace_id") String traceId,
@@ -105,7 +107,6 @@ public class TraceController {
             @RequestParam("name") String name,
             @RequestParam("value") String value,
             @RequestParam("line") Integer line) {
-        log.info("dumpVarInSpan called");
         if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
             return "empty traceId or spanId or name";
         }
@@ -120,9 +121,9 @@ public class TraceController {
         return spanDumpItemEntity;
     }
 
+    @RequestLog
     @PostMapping("/list")
     public @ResponseBody BeanPage<String> listTraces(@RequestBody BeanPaginator paginator) {
-        log.info("listTraces form {}", paginator);
         BeanPage<String> traceIdsPage = traceSpanService.listTraceIds(paginator);
         return traceIdsPage;
     }
@@ -139,27 +140,26 @@ public class TraceController {
         return traceSpanEntity;
     }
 
+    @RequestLog
     @PostMapping("/stack_trace/span")
     public @ResponseBody Object getSpanStackTrace(@RequestBody ViewStackTraceForm form) {
-        log.info("getSpanStackTrace form {}", form);
         List<SpanStackTraceEntity> spanStackTraceEntities = traceSpanService.listSpanStackTrace(form.getSpanId(), form.getSeqInSpan());
         return spanStackTraceEntities;
     }
 
+    @RequestLog
     @PostMapping("/view_stack_variables/span")
     public @ResponseBody Object viewStackVariablesInSpan(@RequestBody ViewStackVariablesForm form) {
-        log.info("viewStackVariablesInSpan form {}", form);
         StackVarSnapshotVo stackVarSnapshot = traceSpanService.listAllMergedSpanDumpsBySpanIdAndSeqInSpan(
                 form.getSpanId(), form.getSeqInSpan()!=null?form.getSeqInSpan():0);
         return stackVarSnapshot;
     }
 
     // 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
+    @RequestLog(response = true)
     @PostMapping("/next_step_span_seq")
     public @ResponseBody NextRequestResponseVo findNextStepSpanSeq(@RequestBody StepStackForm form)
             throws SpanNotFoundException {
-        log.info("findNextStepSpanSeq form {}", form);
-
         if(StringUtils.isEmpty(form.getCurrentSpanId()) && !StringUtils.isEmpty(form.getTraceId())) {
             // 只提供了traceId，要找此traceId的第一个spanId
             TraceSpanEntity firstTraceSpan = traceSpanService.findFirstSpanOfTrace(form.getTraceId());

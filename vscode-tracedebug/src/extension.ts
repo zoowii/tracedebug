@@ -109,15 +109,16 @@ export function activate(context: vscode.ExtensionContext) {
 	// 左侧活动试图增加一个trace list view
 	const traceNodeProvider = new TraceNodeProvider();
 	vscode.window.registerTreeDataProvider('traceNodes', traceNodeProvider);
-	vscode.commands.registerCommand('traceNodes.refreshList', () => traceNodeProvider.refresh());
-	vscode.commands.registerCommand('extension.openTraceAndSpan', spanItem => {
+	context.subscriptions.push(vscode.commands.registerCommand('traceNodes.refreshList', () => traceNodeProvider.refresh()));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.openTraceAndSpan', spanItem => {
 		console.log('on click span', spanItem)
 		if(spanItem && spanItem.traceId) {
-			setCurrentTraceId(spanItem.traceId, spanItem.spanId)
+			// 选择选中的spanId的前一个spanId，从而调试的下一项就是这一个spanId
+			setCurrentTraceId(spanItem.traceId, spanItem.beforeSpanId)
 			// toast通知用户已经设置了待调试的traceId
 			vscode.window.showInformationMessage('traceId to debugger is set');
 		}
-	});
+	}));
 }
 
 export function deactivate() {

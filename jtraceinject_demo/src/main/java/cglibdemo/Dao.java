@@ -16,7 +16,7 @@ public class Dao {
         }
         hi();
         System.out.println(Integer.valueOf(b));
-//        Integer c = b * 3; // TODO: 这种情况会出BUG
+//        Integer c = b; // TODO: 这种情况会出BUG
         System.out.println("PeopleDao.update() " + b);
     }
 

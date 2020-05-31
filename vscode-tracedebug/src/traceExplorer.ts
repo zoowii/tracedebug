@@ -43,16 +43,20 @@ export class TraceNodeProvider implements vscode.TreeDataProvider<vscode.TreeIte
 	private async getSpanNodeList(traceId: string): Promise<vscode.TreeItem[]> {
 		const res = await rpcClient.listSpansOfTrace(traceId)
 		console.log('span list', res)
-		const toNode = (spanItem: any): SpanNode => {
+		const toNode = (spanItem: any, spanItemBefore: any): SpanNode => {
 			// 点击span的时候要设置这个traceId的这个spanId作为待调试对象，并toast提示用户
-			return new SpanNode(spanItem.spanId, spanItem.traceId, spanItem.moduleId, spanItem.classname,
+			return new SpanNode(spanItem.spanId, spanItem.traceId, spanItemBefore?spanItemBefore.spanId:undefined, spanItem.moduleId, spanItem.classname,
 				 spanItem.methodName, spanItem.stackDepth, vscode.TreeItemCollapsibleState.None, {
 				command: 'extension.openTraceAndSpan',
 				title: '',
 				arguments: [spanItem]
 			})
 		}
-		const spanNodes = res.map(toNode)
+		const spanNodes: Array<SpanNode> = []
+		for(let i = 0;i<res.length;i++) {
+			const item = toNode(res[i], i>0?res[i-1]:undefined)
+			spanNodes.push(item)
+		}
 		return spanNodes
 	}
 
@@ -94,7 +98,7 @@ export class TraceNode extends vscode.TreeItem {
 }
 
 export class SpanNode extends vscode.TreeItem {
-	constructor(public spanId: string, public traceId: string, public moduleId: string,
+	constructor(public spanId: string, public traceId: string, public beforeSpanId: string, public moduleId: string,
 		public classname: string, public methodName: string, public stackDepth: number,
 		  public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly command?: vscode.Command) {
