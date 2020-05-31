@@ -7,6 +7,7 @@ import org.aspectj.apache.bcel.classfile.annotation.AnnotationGen;
 import org.aspectj.apache.bcel.generic.*;
 import org.objectweb.asm.Opcodes;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -217,7 +218,15 @@ public class ClassInjector {
         JavaClass cls = Repository.lookupClass(sourceClass.getName());
         // 继承原类
         ConstantPool cpool = cls.getConstantPool();
-        ClassGen cg = new ClassGen(newClsName, sourceClass.getName(), cls.getFileName(),
+        String packageName = sourceClass.getPackage().getName();
+        String sourceOnlyFilename = cls.getSourceFileName();
+        String targetFilename;
+        if(packageName.isEmpty()) {
+            targetFilename = sourceOnlyFilename;
+        } else {
+            targetFilename = packageName.replaceAll("[.]", "/") + "/" + sourceOnlyFilename;
+        }
+        ClassGen cg = new ClassGen(newClsName, sourceClass.getName(), targetFilename,
                 cls.getModifiers(), null, cpool);
         // 原类的注解也要加上
         for (AnnotationGen anno : cls.getAnnotations()) {

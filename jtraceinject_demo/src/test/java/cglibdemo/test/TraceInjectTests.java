@@ -1,3 +1,5 @@
+package cglibdemo.test;
+
 import cglibdemo.Dao;
 import classinjector.ClassInjector;
 import org.junit.Test;

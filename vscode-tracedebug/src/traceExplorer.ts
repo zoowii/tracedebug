@@ -120,3 +120,7 @@ export class SpanNode extends vscode.TreeItem {
 
 	contextValue = 'span';
 }
+
+export async function showErrorMessage(msg) {
+	await vscode.window.showErrorMessage(msg)
+}

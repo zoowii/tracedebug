@@ -1,6 +1,6 @@
 (function () {
     window.TRACE_ENDPOINT = 'http://localhost:8280/tracedebug';
-    window.TRACE_MODULE_ID = 'test'
+    window.TRACE_MODULE_ID = 'test_frontend'
     const traceId = traceStart()
     const spanId = spanStart(traceId)
     let hello = 'world'

@@ -12,6 +12,7 @@ import {
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { basename } from 'path';
 import { TraceRuntime, MockBreakpoint } from './traceRuntime';
+import {showErrorMessage} from './traceExplorer'
 import { TraceRpcClient, getCurrentTraceId, getCurrentSpanId } from './traceRpcClient';
 const { Subject } = require('await-notify');
 
@@ -172,6 +173,12 @@ export class TraceDebugSession extends LoggingDebugSession {
 		this.currentSpanId = getCurrentSpanId();
 		console.log('current traceId, spanId set to ' + this.currentTraceId + ', ' + this.currentSpanId)
 
+		if(!this.currentTraceId) {
+			showErrorMessage(`please select a trace and span to debug`)
+			this.sendEvent(new TerminatedEvent(false))
+			return
+		}
+
 		const firstSpanRes = await this.rpcClient.getNextRequest(this.currentTraceId, this.currentSpanId, undefined, 'step_over', [])
 		if(firstSpanRes) {
 			console.log('firstSpanRes', firstSpanRes)
@@ -276,7 +283,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 			const item = res[i];
 			const moduleId = item.moduleId
 			const classname = item.classname
-			const filename = this.rpcClient.resolveFilename(moduleId, classname, item.filename);
+			const filename = await this.rpcClient.resolveFilenameWithCache(moduleId, classname, item.filename) || item.filename;
 			const sf = new StackFrame(i, item.methodName, this.createSource(filename), this.convertDebuggerLineToClient((item.line || 1) - 1));
 			if (typeof item.column === 'number') {
 				sf.column = this.convertDebuggerColumnToClient(item.column);
