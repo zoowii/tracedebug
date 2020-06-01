@@ -232,6 +232,7 @@ public class ClassInjector {
         for (AnnotationGen anno : cls.getAnnotations()) {
             cg.addAnnotation(anno);
         }
+        // TODO: 原类的私有字段也要加上
 
         for (Method sourceMethod : methods) {
             // 只处理public的虚方法，并且不是静态方法

@@ -18,6 +18,7 @@
 		<java.version>1.8</java.version>
 		<logback.version>1.2.3</logback.version>
 		<logback.spring.version>0.1.4</logback.spring.version>
+		<jtraceinject.version>1.0-SNAPSHOT</jtraceinject.version>
 	</properties>
 
 	<dependencies>
@@ -154,6 +155,12 @@
 			<groupId>org.logback-extensions</groupId>
 			<artifactId>logback-ext-spring</artifactId>
 			<version>${logback.spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.zoowii</groupId>
+			<artifactId>jtraceinject</artifactId>
+			<version>${jtraceinject.version}</version>
 		</dependency>
 
 	</dependencies>
