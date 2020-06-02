@@ -14,3 +14,12 @@ spring:
 
       hibernate:
         ddl-auto: none  # none for production, create or update for localtest
+
+tracedebug:
+  datasource:
+    # 192.168.1.220
+    url: jdbc:mysql://127.0.0.1:3306/debug_trace_dev?characterEncoding=utf-8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+    # yqr@2017
+    password: 123456
+

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -17,9 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -37,26 +34,16 @@ public class TraceAspectProxy implements ApplicationContextAware, BeanFactoryPos
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        if(!(beanFactory instanceof DefaultListableBeanFactory)) {
+        if (!(beanFactory instanceof DefaultListableBeanFactory)) {
             return;
         }
-        // TODO: 从配置文件读取
-        String mysqlHost = "127.0.0.1"; // "192.168.1.220";
-        int mysqlPort = 3306;
-        String dbName = "debug_trace_dev";
-        String dbUrl = String.format("jdbc:mysql://%s:%d/%s?characterEncoding=utf-8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC", mysqlHost, mysqlPort, dbName);
-        String username = "root";
-        String password = "123456"; // "yqr@2017";
-        System.setProperty("DATABASE_URL", dbUrl);
-        System.setProperty("DB_USER", username);
-        System.setProperty("DB_PASS", password);
 
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) beanFactory;
         String[] beanDefinitionNames = beanFactory.getBeanDefinitionNames();
-        for(String defName : beanDefinitionNames) {
+        for (String defName : beanDefinitionNames) {
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(defName);
             String clsName = beanDefinition.getBeanClassName();
-            if(clsName==null) {
+            if (clsName == null) {
                 continue;
             }
             Class<?> beanCls;
@@ -67,21 +54,21 @@ public class TraceAspectProxy implements ApplicationContextAware, BeanFactoryPos
                 continue;
             }
             // 已经是debugtrace产生的类不需要再增强
-            if(clsName.endsWith("_proxy")) {
+            if (clsName.endsWith("_proxy")) {
                 continue;
             }
             // TODO: 只要方法总有@DebugTrace也算
             DebugTrace clsTraceAnno = beanCls.getDeclaredAnnotation(DebugTrace.class);
-            if(clsTraceAnno == null) {
+            if (clsTraceAnno == null) {
                 continue;
             }
             log.info("found debugtrace annotated class {}", beanCls.getName());
             // TODO: 给这个类trace增强
             Method[] methods = beanCls.getMethods();
             List<Method> traceMethods = new ArrayList<>();
-            for(Method method : methods) {
+            for (Method method : methods) {
                 DebugTrace methodTraceAnno = method.getDeclaredAnnotation(DebugTrace.class);
-                if(methodTraceAnno==null) {
+                if (methodTraceAnno == null) {
                     continue;
                 }
                 traceMethods.add(method);

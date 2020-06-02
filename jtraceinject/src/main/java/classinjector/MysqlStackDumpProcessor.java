@@ -17,36 +17,67 @@ import java.util.List;
 public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
     private Logger log = LoggerFactory.getLogger(MysqlStackDumpProcessor.class);
 
-    private final DataSource dataSource;
+    private DataSource dataSource;
 
-    public MysqlStackDumpProcessor() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private static class DbOptions {
+        private String dbUrl;
+        private String username;
+        private String password;
+        private String driver;
+    }
+
+    private static DbOptions options;
+
+    static {
+        options = new DbOptions();
+        options.dbUrl = System.getProperty("DATABASE_URL");
+        options.username = System.getProperty("DB_USER");
+        options.password = System.getProperty("DB_PASS");
+        options.driver = System.getProperty("DB_DRIVER", "com.mysql.cj.jdbc.Driver");
+    }
+
+    public static void setDbOptions(String dbUrl, String dbUser, String dbPassword) {
+        options.dbUrl = dbUrl;
+        options.username = dbUser;
+        options.password = dbPassword;
+    }
+
+    private DataSource getDataSource() {
+        if (dataSource != null) {
+            return dataSource;
+        }
         // 连接到mysql
-        String dbUrl = System.getProperty("DATABASE_URL");
-        log.info("MysqlStackDumpProcessor DATABASE_URL property is {}", dbUrl);
-        if (dbUrl == null || dbUrl.isEmpty()) {
-            throw new RuntimeException("db url empty");
-        }
-        if (!dbUrl.startsWith("jdbc")) {
-            throw new RuntimeException("invali db url");
-        }
-        String dbUser = System.getProperty("DB_USER");
-        String dbPass = System.getProperty("DB_PASS");
+        try {
+            String dbUrl = options.dbUrl;
+            log.info("MysqlStackDumpProcessor db url is {}", dbUrl);
+            if (dbUrl == null || dbUrl.isEmpty()) {
+                throw new RuntimeException("db url empty");
+            }
+            if (!dbUrl.startsWith("jdbc")) {
+                throw new RuntimeException("invalid db url");
+            }
+            String dbUser = options.username;
+            String dbPass = options.password;
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Class dataSourceCls = Class.forName("com.mysql.cj.jdbc.MysqlConnectionPoolDataSource");
-        this.dataSource = (DataSource) dataSourceCls.getDeclaredConstructor().newInstance();
-        Method setUrlMethod = dataSource.getClass().getMethod("setUrl", String.class);
-        if (setUrlMethod != null) {
+            Class.forName(options.driver);
+            Class<?> dataSourceCls = Class.forName("com.mysql.cj.jdbc.MysqlConnectionPoolDataSource");
+            this.dataSource = (DataSource) dataSourceCls.getDeclaredConstructor().newInstance();
+            Method setUrlMethod = dataSource.getClass().getMethod("setUrl", String.class);
             setUrlMethod.invoke(dataSource, dbUrl);
-        }
-        Method setUserMethod = dataSource.getClass().getMethod("setUser", String.class);
-        if (setUserMethod != null) {
+            Method setUserMethod = dataSource.getClass().getMethod("setUser", String.class);
             setUserMethod.invoke(dataSource, dbUser);
-        }
-        Method setPasswordMethod = dataSource.getClass().getMethod("setPassword", String.class);
-        if (setPasswordMethod != null) {
+            Method setPasswordMethod = dataSource.getClass().getMethod("setPassword", String.class);
             setPasswordMethod.invoke(dataSource, dbPass);
+            return this.dataSource;
+        } catch (ClassNotFoundException | NoSuchMethodException |
+                IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+    }
+
+    public MysqlStackDumpProcessor() {
+
     }
 
     private int maxStackTraceDepth = 5;
@@ -56,9 +87,10 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
 
     @Override
     public void onSpanStart(String spanId, List<StackTraceElement> stackTrace, int stackDepth) {
-        System.out.println("span " + spanId + " started in traceId " + traceId);
+        log.info("span {} started in traceId {}", spanId, traceId);
         // TODO: 从当前线程或者请求参数获取traceId(如果没有，返回)。记录spanId和traceId映射关系
-        if (dataSource == null) {
+        DataSource db = getDataSource();
+        if (db == null) {
             return;
         }
         String moduleId = "test"; // 模块ID，区分本span属于整个架构的哪个模块或者子服务
@@ -73,7 +105,7 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
                 methodName = stackTraceElement.getMethodName();
             }
 
-            Connection conn = dataSource.getConnection();
+            Connection conn = db.getConnection();
             try {
                 {
                     PreparedStatement pstm = conn.prepareStatement("insert into trace_span" +
@@ -129,13 +161,13 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
     @Override
     public void onDump(String spanId, int seqInSpan, String name, WeakReference<Object> valueRef, int lineNumber) {
         Object value = valueRef.get();
-        System.out.println("line " + lineNumber + " span " + spanId + "[" + seqInSpan + "] var " + name + " value " + value);
-
-        if (dataSource == null) {
+        log.info("line {} span {}[{}] var {} value {}", lineNumber, spanId, seqInSpan, name, value);
+        DataSource db = getDataSource();
+        if (db == null) {
             return;
         }
         try {
-            Connection conn = dataSource.getConnection();
+            Connection conn = db.getConnection();
             try {
                 PreparedStatement pstm = conn.prepareStatement(
                         "insert into span_dump_item (trace_id, span_id, seq_in_span, `name`, `value`, line)" +
