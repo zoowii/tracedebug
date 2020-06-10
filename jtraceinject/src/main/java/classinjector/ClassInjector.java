@@ -7,13 +7,8 @@ import org.aspectj.apache.bcel.classfile.annotation.AnnotationGen;
 import org.aspectj.apache.bcel.generic.*;
 import org.objectweb.asm.Opcodes;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class ClassInjector {
 
@@ -226,13 +221,26 @@ public class ClassInjector {
         } else {
             targetFilename = packageName.replaceAll("[.]", "/") + "/" + sourceOnlyFilename;
         }
+
+        String[] clsInterfaces = cls.getInterfaceNames();
+        Set<String> newClsInterfaces = new HashSet<>();
+        newClsInterfaces.addAll(Arrays.asList(clsInterfaces));
+        newClsInterfaces.add(ITraceInjected.class.getName());
+
         ClassGen cg = new ClassGen(newClsName, sourceClass.getName(), targetFilename,
-                cls.getModifiers(), null, cpool);
+                cls.getModifiers(), newClsInterfaces.toArray(new String[0]), cpool);
+
         // 原类的注解也要加上
         for (AnnotationGen anno : cls.getAnnotations()) {
+            if(anno.getTypeName().equals(TraceInjectedType.class.getName())) {
+                continue; // 跳过  @TraceInjectedType 注解
+            }
             cg.addAnnotation(anno);
         }
-        // TODO: 原类的私有字段也要加上
+        // 加上 @TraceInjectedType 注解
+        cg.addAnnotation(new AnnotationGen(new ObjectType(TraceInjectedType.class.getName()),
+                Collections.emptyList(), true, cpool));
+        // TODO: 原类的私有字段和static方法也要加上
 
         for (Method sourceMethod : methods) {
             // 只处理public的虚方法，并且不是静态方法

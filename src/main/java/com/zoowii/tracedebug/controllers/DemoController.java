@@ -10,13 +10,13 @@ import javax.annotation.Resource;
 
 @Slf4j
 @RestController
-//@DebugTrace
+@DebugTrace
 public class DemoController {
 
     @Resource
-    private HelloService helloService;
+    protected HelloService helloService;
 
-//    @DebugTrace
+    @DebugTrace
     @GetMapping("/hello")
     public Object hello() {
         String msg = helloService.helloSum("world", 100, 222);

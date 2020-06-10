@@ -1,5 +1,8 @@
 package cglibdemo;
 
+import classinjector.TraceInjectedType;
+
+@TraceInjectedType
 @DemoAnno
 public class Dao {
     private Dao instance = null; // = new Dao();
