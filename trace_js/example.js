@@ -11,4 +11,5 @@
     testFunc()
     hello = hello + hello
     spanDump(spanId, 'hello', hello)
+    document.getElementById('traceIdInput').value = traceId
 })();

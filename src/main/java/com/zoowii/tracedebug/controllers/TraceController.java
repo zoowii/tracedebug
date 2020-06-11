@@ -15,10 +15,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping("/api/trace")
 public class TraceController {
@@ -65,7 +65,7 @@ public class TraceController {
      */
     @RequestLog
     @GetMapping("/add_span_stack_trace_element")
-    public @ResponseBody Object addSpanStackTraceElement(
+    public Object addSpanStackTraceElement(
             @RequestParam("trace_id") String traceId,
             @RequestParam("span_id") String spanId,
             @RequestParam("stack_index") Integer stackIndex,
@@ -102,7 +102,7 @@ public class TraceController {
      */
     @RequestLog
     @GetMapping("/span_dump")
-    public @ResponseBody Object dumpVarInSpan(
+    public Object dumpVarInSpan(
             @RequestParam("trace_id") String traceId,
             @RequestParam("span_id") String spanId,
             @RequestParam("seq_in_span") Integer seqInSpan,
@@ -125,33 +125,33 @@ public class TraceController {
 
     @RequestLog
     @PostMapping("/list")
-    public @ResponseBody BeanPage<String> listTraces(@RequestBody BeanPaginator paginator) {
+    public BeanPage<String> listTraces(@RequestBody BeanPaginator paginator) {
         BeanPage<String> traceIdsPage = traceSpanService.listTraceIds(paginator);
         return traceIdsPage;
     }
 
     @GetMapping("/list_spans/{traceId}")
-    public @ResponseBody List<TraceSpanEntity> listTraceSpans(@PathVariable("traceId") String traceId) {
+    public List<TraceSpanEntity> listTraceSpans(@PathVariable("traceId") String traceId) {
         List<TraceSpanEntity> spanEntities = traceSpanService.findAllByTraceIdOrderByIdAsc(traceId);
         return spanEntities;
     }
 
     @GetMapping("/span/{spanId}")
-    public @ResponseBody Object getSpanInfo(@PathVariable("spanId") String spanId) {
+    public Object getSpanInfo(@PathVariable("spanId") String spanId) {
         TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(spanId);
         return traceSpanEntity;
     }
 
     @RequestLog
     @PostMapping("/stack_trace/span")
-    public @ResponseBody Object getSpanStackTrace(@RequestBody ViewStackTraceForm form) {
+    public Object getSpanStackTrace(@RequestBody ViewStackTraceForm form) {
         List<SpanStackTraceEntity> spanStackTraceEntities = traceSpanService.listSpanStackTrace(form.getSpanId(), form.getSeqInSpan());
         return spanStackTraceEntities;
     }
 
     @RequestLog
     @PostMapping("/view_stack_variables/span")
-    public @ResponseBody Object viewStackVariablesInSpan(@RequestBody ViewStackVariablesForm form) {
+    public Object viewStackVariablesInSpan(@RequestBody ViewStackVariablesForm form) {
         StackVarSnapshotVo stackVarSnapshot = traceSpanService.listAllMergedSpanDumpsBySpanIdAndSeqInSpan(
                 form.getSpanId(), form.getSeqInSpan()!=null?form.getSeqInSpan():0);
         return stackVarSnapshot;
@@ -160,7 +160,7 @@ public class TraceController {
     // 找到在某个spanId,某个seqInSpan的基础上继续执行到某些breakpoints后的下一个spanId+seqInSpan
     @RequestLog(response = true)
     @PostMapping("/next_step_span_seq")
-    public @ResponseBody NextRequestResponseVo findNextStepSpanSeq(@RequestBody StepStackForm form)
+    public NextRequestResponseVo findNextStepSpanSeq(@RequestBody StepStackForm form)
             throws SpanNotFoundException {
         return traceDebugService.nextStep(form);
     }

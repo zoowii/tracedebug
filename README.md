@@ -16,3 +16,8 @@ trace-debug
 * 简单java项目回溯调试的例子
 * javascript + spring boot的完整前后端用日志回溯调试的例子
 
+# 样例
+
+* js前端请求java web后端，然后根据日志回溯调试
+
+![trace_debug_example.gif](docs/trace_debug_example.gif)

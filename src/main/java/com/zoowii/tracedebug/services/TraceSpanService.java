@@ -71,7 +71,7 @@ public class TraceSpanService {
         return spanDumpItemRepository.findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(spanId, seqInSpan);
     }
 
-    public SpanDumpItemEntity findFirstBySpanIdAndSeqInSpan(String spanId, int seqInSpan) {
+    public SpanDumpItemEntity findFirstBySpanIdAndSeqInSpanOrderByIdAsc(String spanId, int seqInSpan) {
         return spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
     }
 

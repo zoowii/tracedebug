@@ -4,7 +4,6 @@ import classinjector.MysqlStackDumpProcessor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +24,6 @@ public class TraceDebugConfig {
     @PostConstruct
     public void afterInit() {
         MysqlStackDumpProcessor.setDbOptions(url, username, password);
-        MysqlStackDumpProcessor.setTraceDumpOptions(moduleId);
+        MysqlStackDumpProcessor.setTraceDumpModuleId(moduleId);
     }
 }

@@ -40,6 +40,7 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
         // init traceDumpOptions
         traceDumpOptions = new TraceDumpOptions();
         traceDumpOptions.setModuleId("java");
+        traceDumpOptions.setCurrentTraceId("test" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date()));
     }
 
     public static void setDbOptions(String dbUrl, String dbUser, String dbPassword) {
@@ -48,8 +49,12 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
         options.password = dbPassword;
     }
 
-    public static void setTraceDumpOptions(String moduleId) {
+    public static void setTraceDumpModuleId(String moduleId) {
         traceDumpOptions.setModuleId(moduleId);
+    }
+
+    public static void setCurrentTraceId(String traceId) {
+        traceDumpOptions.setCurrentTraceId(traceId);
     }
 
     private DataSource getDataSource() {
@@ -93,10 +98,10 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
     private int maxStackTraceDepth = 5;
 
     // TODO: traceStart的时候产生traceId
-    String traceId = "test" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date()); // TODO
 
     @Override
     public void onSpanStart(String spanId, List<StackTraceElement> stackTrace, int stackDepth) {
+        String traceId = traceDumpOptions.getCurrentTraceId();
         log.info("span {} started in traceId {}", spanId, traceId);
         // TODO: 从当前线程或者请求参数获取traceId(如果没有，返回)。记录spanId和traceId映射关系
         DataSource db = getDataSource();
@@ -170,6 +175,7 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
 
     @Override
     public void onDump(String spanId, int seqInSpan, String name, WeakReference<Object> valueRef, int lineNumber) {
+        String traceId = traceDumpOptions.getCurrentTraceId();
         Object value = valueRef.get();
         log.info("line {} span {}[{}] var {} value {}", lineNumber, spanId, seqInSpan, name, value);
         DataSource db = getDataSource();

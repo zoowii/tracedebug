@@ -4,9 +4,16 @@
     <meta charset="utf8">
     <title>trace.js example</title>
     <script src="./tracedebug.js"></script>
-    <script src="./example.js"></script>
 </head>
 <body>
 This is trace debug javascript sdk usage demo
+
+<div>
+    <form method="get" action="http://localhost:8280/tracedebug/hello">
+        <input type="hidden" id="traceIdInput" name="TRACE_ID" value="">
+        <input type="submit" value="Click to request backend api">
+    </form>
+</div>
+<script src="./example.js"></script>
 </body>
 </html>

@@ -37,28 +37,13 @@ public class TraceDebugService {
             throw new SpanNotFoundException("can't find span " + form.getCurrentSpanId());
         }
         String traceId = currentTraceSpanEntity.getTraceId();
-        SpanDumpItemEntity currentSpanAndSeqInSpanInfo = traceSpanService.findFirstBySpanIdAndSeqInSpan(currentSpanId, currentSeqInSpan);
+        SpanDumpItemEntity currentSpanAndSeqInSpanInfo = traceSpanService.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(currentSpanId, currentSeqInSpan);
         if(currentSpanAndSeqInSpanInfo==null) {
             SpanDumpItemEntity spanFirstSeqInSpanId = traceSpanService.findFirstDumpBySpanId(currentSpanId);
             if(spanFirstSeqInSpanId==null) {
                 throw new SpanNotFoundException("invalid span " + form.getCurrentSpanId());
             }
             return new NextRequestResponseVo(traceId, currentSpanId, spanFirstSeqInSpanId.getSeqInSpan());
-        }
-
-        List<TraceSpanEntity> traceSpansInTrace = traceSpanService.findAllByTraceIdOrderByIdAsc(traceId);
-        // 排除比当前spanId+seqInSpan更早的span记录
-        List<TraceSpanEntity> spansAfterOrSelf = new ArrayList<>();
-        boolean foundCurrentSpan = false;
-        for(TraceSpanEntity spanEntity : traceSpansInTrace) {
-            if(foundCurrentSpan) {
-                spansAfterOrSelf.add(spanEntity);
-                continue;
-            }
-            if(spanEntity.getSpanId()!=null&&spanEntity.getSpanId().equals(currentSpanId)) {
-                foundCurrentSpan = true;
-                spansAfterOrSelf.add(spanEntity);
-            }
         }
 
         // 之后的所有dumps(主要是spanId, seqInSpan的有序序列)
@@ -86,13 +71,15 @@ public class TraceDebugService {
                 }
                 switch (stepType) {
                     case "step_out": {
-                        if(spanEntity.getStackDepth()>=currentTraceSpanEntity.getStackDepth()) {
+                        if(spanEntity.getModuleId().equals(currentTraceSpanEntity.getModuleId())
+                                && spanEntity.getStackDepth()>=currentTraceSpanEntity.getStackDepth()) {
                             continue;
                         }
                         return new NextRequestResponseVo(traceId, spanEntity.getSpanId(), 0);
                     }
                     case "step_over": {
-                        if(spanEntity.getStackDepth()>currentTraceSpanEntity.getStackDepth()) {
+                        if(spanEntity.getModuleId().equals(currentTraceSpanEntity.getModuleId())
+                                && spanEntity.getStackDepth()>currentTraceSpanEntity.getStackDepth()) {
                             continue;
                         }
                         return new NextRequestResponseVo(traceId, spanEntity.getSpanId(), 0);
