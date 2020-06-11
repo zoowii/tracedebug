@@ -19,9 +19,12 @@ public class TraceDebugConfig {
     private String username;
     @Value("${tracedebug.datasource.password}")
     private String password;
+    @Value("${tracedebug.moduleId}")
+    private String moduleId;
 
     @PostConstruct
     public void afterInit() {
         MysqlStackDumpProcessor.setDbOptions(url, username, password);
+        MysqlStackDumpProcessor.setTraceDumpOptions(moduleId);
     }
 }

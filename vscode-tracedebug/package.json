@@ -10,7 +10,9 @@
 	},
 	"license": "MIT",
 	"keywords": [
-		"debugger", "java", "trace"
+		"debugger",
+		"java",
+		"trace"
 	],
 	"engines": {
 		"vscode": "^1.44.0"

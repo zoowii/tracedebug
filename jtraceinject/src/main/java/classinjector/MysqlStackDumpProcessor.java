@@ -27,19 +27,29 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
     }
 
     private static DbOptions options;
+    private static TraceDumpOptions traceDumpOptions;
 
     static {
+        // init dbOptions
         options = new DbOptions();
         options.dbUrl = System.getProperty("DATABASE_URL");
         options.username = System.getProperty("DB_USER");
         options.password = System.getProperty("DB_PASS");
         options.driver = System.getProperty("DB_DRIVER", "com.mysql.cj.jdbc.Driver");
+
+        // init traceDumpOptions
+        traceDumpOptions = new TraceDumpOptions();
+        traceDumpOptions.setModuleId("java");
     }
 
     public static void setDbOptions(String dbUrl, String dbUser, String dbPassword) {
         options.dbUrl = dbUrl;
         options.username = dbUser;
         options.password = dbPassword;
+    }
+
+    public static void setTraceDumpOptions(String moduleId) {
+        traceDumpOptions.setModuleId(moduleId);
     }
 
     private DataSource getDataSource() {
@@ -93,7 +103,7 @@ public class MysqlStackDumpProcessor extends DemoStackDumpProcessor {
         if (db == null) {
             return;
         }
-        String moduleId = "test"; // 模块ID，区分本span属于整个架构的哪个模块或者子服务
+        String moduleId = traceDumpOptions.getModuleId(); // 模块ID，区分本span属于整个架构的哪个模块或者子服务
 
         try {
             String clsName = null;

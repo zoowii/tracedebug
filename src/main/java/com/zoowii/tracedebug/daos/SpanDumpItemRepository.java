@@ -9,4 +9,7 @@ public interface SpanDumpItemRepository extends CrudRepository<SpanDumpItemEntit
     List<SpanDumpItemEntity> findAllBySpanIdOrderBySeqInSpan(String spanId);
     List<SpanDumpItemEntity> findAllBySpanIdAndSeqInSpanGreaterThanOrderBySeqInSpan(String spanId, int seqInSpan);
     SpanDumpItemEntity findFirstBySpanIdAndSeqInSpanOrderByIdAsc(String spanId, int seqInSpan);
+    SpanDumpItemEntity findFirstBySpanIdOrderByIdAsc(String spanId);
+
+    List<SpanDumpItemEntity> findAllByTraceIdAndIdGreaterThanOrderByIdAsc(String traceId, long id);
 }

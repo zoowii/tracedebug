@@ -75,6 +75,14 @@ public class TraceSpanService {
         return spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
     }
 
+    public SpanDumpItemEntity findFirstDumpBySpanId(String spanId) {
+        return spanDumpItemRepository.findFirstBySpanIdOrderByIdAsc(spanId);
+    }
+
+    public List<SpanDumpItemEntity> findAllDumpsByTraceIdAndIdGreaterThanOrderByIdAsc(String traceId, long id) {
+        return spanDumpItemRepository.findAllByTraceIdAndIdGreaterThanOrderByIdAsc(traceId, id);
+    }
+
     /**
      * 根据spanId,当前seqInSpan(null就表示0), line找出当前span的variables快照的值
      * 同一个span中，大seqInSpan会覆盖小seqInSpan中的变量值，也包含之前的变量，后端需要做合并
