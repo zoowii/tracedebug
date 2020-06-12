@@ -1,6 +1,7 @@
 package com.zoowii.tracedebug.configs;
 
-import classinjector.MysqlStackDumpProcessor;
+import classinjector.AsyncMysqlStackDumpProcessor;
+import classinjector.TraceContext;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,7 @@ public class TraceDebugConfig {
 
     @PostConstruct
     public void afterInit() {
-        MysqlStackDumpProcessor.setDbOptions(url, username, password);
-        MysqlStackDumpProcessor.setTraceDumpModuleId(moduleId);
+        AsyncMysqlStackDumpProcessor.setDbOptions(url, username, password);
+        TraceContext.setTraceDumpModuleId(moduleId);
     }
 }

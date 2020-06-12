@@ -10,6 +10,8 @@ public class StackDumper {
     private static List<IStackDumpProcessor> dumpProcessors = new ArrayList<IStackDumpProcessor>();
 
     static {
+        TraceContext.load();
+        
         ServiceLoader<IStackDumpProcessor> dumpProcessorServiceLoader = ServiceLoader.load(IStackDumpProcessor.class);
         for (IStackDumpProcessor processor : dumpProcessorServiceLoader) {
             try {

@@ -2,7 +2,7 @@ package classinjector;
 
 public class TraceDumpOptions {
     private String moduleId;
-    private String currentTraceId;
+    private ThreadLocal<String> currentTraceId = new ThreadLocal<>();
 
     public String getModuleId() {
         return moduleId;
@@ -13,10 +13,10 @@ public class TraceDumpOptions {
     }
 
     public String getCurrentTraceId() {
-        return currentTraceId;
+        return currentTraceId.get();
     }
 
     public void setCurrentTraceId(String currentTraceId) {
-        this.currentTraceId = currentTraceId;
+        this.currentTraceId.set(currentTraceId);
     }
 }

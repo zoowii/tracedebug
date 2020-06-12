@@ -1,2 +1,2 @@
-classinjector.MysqlStackDumpProcessor
+classinjector.AsyncMysqlStackDumpProcessor
 classinjector.DemoStackDumpProcessor

@@ -50,7 +50,7 @@ public class TraceDebugService {
         List<SpanDumpItemEntity> spanDumpItemEntitiesAfter = traceSpanService.findAllDumpsByTraceIdAndIdGreaterThanOrderByIdAsc(
                 traceId, currentSpanAndSeqInSpanInfo.getId());
 
-        // TODO: a方法调用b方法时，调试的时候要根据dump的顺序从a进入b然后返回a
+        // a方法调用b方法时，调试的时候要根据dump的顺序从a进入b然后返回a
 
         // 在spansAfterOrSelf中依次找到满足 (currentSpanId, currentSeqInSpan)之后并满足 stepType的下一个(spanId, seqInSpan)
         // 根据 stepType，要计算span的stackDepth判断是否暂停到断点

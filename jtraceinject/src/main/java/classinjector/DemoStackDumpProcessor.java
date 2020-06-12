@@ -6,9 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class DemoStackDumpProcessor implements IStackDumpProcessor {
-    // TODO: 保存trace信息到日志服务或者数据库，以及提供API和界面用来回溯断点调试
-
-    private ThreadLocal<Boolean> debugTraceEnabled = new ThreadLocal<Boolean>();
+    private final ThreadLocal<Boolean> debugTraceEnabled = new ThreadLocal<>();
 
     @Override
     public boolean isDebugTraceEnabledTrace() {

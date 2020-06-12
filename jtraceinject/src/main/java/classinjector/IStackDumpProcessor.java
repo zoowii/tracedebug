@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public interface IStackDumpProcessor {
+
     // 当前trace是否开启了debug trace
     boolean isDebugTraceEnabledTrace();
 
