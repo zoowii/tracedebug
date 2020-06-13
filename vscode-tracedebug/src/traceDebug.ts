@@ -60,6 +60,8 @@ export class TraceDebugSession extends LoggingDebugSession {
 	private currentSpanId ?: string = undefined
 	private currentSeqInSpan?: Number = 0
 
+	private breakpoints: {} = {} // path => Array<Breakpoint>
+
 	/**
 	 * Creates a new debug adapter that is used for one debug session.
 	 * We configure the default implementation of a debug adapter here.
@@ -211,6 +213,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 			let { verified, line, id } = this._runtime.setBreakPoint(path, this.convertClientLineToDebugger(l));
 			const bp = <DebugProtocol.Breakpoint> new Breakpoint(verified, this.convertDebuggerLineToClient(line));
 			bp.id= id;
+			bp.source = this.createSource(path)
 			return bp;
 		});
 
@@ -218,6 +221,7 @@ export class TraceDebugSession extends LoggingDebugSession {
 		response.body = {
 			breakpoints: actualBreakpoints
 		};
+		this.breakpoints[path] = actualBreakpoints
 		this.sendResponse(response);
 	}
 
@@ -405,7 +409,8 @@ export class TraceDebugSession extends LoggingDebugSession {
 	}
 
 	protected async continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments) {
-		this._runtime.continue();
+		// this._runtime.continue();
+		this._runtime.sendEvent('stopOnDataBreakpoint');
 		await this.sendNextRequest(response, args, 'continue')
 	}
 
@@ -422,7 +427,24 @@ export class TraceDebugSession extends LoggingDebugSession {
 			this.sendEvent(new TerminatedEvent())
 			return
 		}
-		const breakpoints = []
+		const breakpoints: Array<object> = []
+		console.log('breakpoints', this.breakpoints)
+		for(const filepath in this.breakpoints) {
+			const fileBps = this.breakpoints[filepath]
+			for(const bp of fileBps) {
+				if(!bp.verified) {
+					continue
+				}
+				// TODO: 从 traceModules中找到这个源文件所在的moduleId
+				const item = {
+					moduleId: null,
+					filename: bp.source.name,
+					filepath: bp.source.path,
+					line: bp.line
+				}
+				breakpoints.push(item)
+			}
+		}
 		const res = await this.rpcClient.getNextRequest(this.currentTraceId, this.currentSpanId, this.currentSeqInSpan, stepType, breakpoints)
 		console.log('next step span response', res)
 		if(!res || !res.spanId) {

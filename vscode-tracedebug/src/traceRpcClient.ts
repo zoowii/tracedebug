@@ -58,13 +58,15 @@ export class TraceRpcClient {
 		})
 		return res
 	}
-	async getNextRequest(traceId: string | undefined, spanId : string | undefined, seqInSpan: Number | undefined, stepType: string, breakpoints) {
+	async getNextRequest(traceId: string | undefined, spanId : string | undefined,
+		 seqInSpan: Number | undefined, stepType: string, breakpoints: Array<object>) {
 		const url = `${endpoint}/api/trace/next_step_span_seq`
 		const reqData = {
 			traceId: traceId,
 			currentSpanId: spanId,
 			currentSeqInSpan: seqInSpan,
-			stepType: stepType
+			stepType: stepType,
+			breakpoints: breakpoints
 		}
 		const res = await rp({
 			method: 'POST',

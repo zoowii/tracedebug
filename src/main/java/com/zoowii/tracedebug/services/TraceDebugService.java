@@ -1,9 +1,11 @@
 package com.zoowii.tracedebug.services;
 
+import com.zoowii.tracedebug.controllers.vo.BreakpointVo;
 import com.zoowii.tracedebug.controllers.vo.NextRequestResponseVo;
 import com.zoowii.tracedebug.controllers.vo.StepStackForm;
 import com.zoowii.tracedebug.exceptions.SpanNotFoundException;
 import com.zoowii.tracedebug.models.SpanDumpItemEntity;
+import com.zoowii.tracedebug.models.SpanStackTraceEntity;
 import com.zoowii.tracedebug.models.TraceSpanEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Slf4j
 @Service
@@ -52,6 +56,44 @@ public class TraceDebugService {
 
         // a方法调用b方法时，调试的时候要根据dump的顺序从a进入b然后返回a
 
+        final List<BreakpointVo> breakpoints = form.getBreakpoints();
+        // 判断是否到某个断点的函数
+        BiFunction<SpanDumpItemEntity, TraceSpanEntity, Boolean> inBreakpoints = (spanDump, spanEntity) -> {
+            if(breakpoints==null) {
+                return false;
+            }
+            // TODO: 找到span所在的filename. 应该直接可以从spanEntity中得到
+            List<SpanStackTraceEntity> spanStackTraceEntities = traceSpanService.listSpanStackTrace(
+                    spanDump.getSpanId(), spanDump.getSeqInSpan());
+            if(spanStackTraceEntities.isEmpty()) {
+                return false;
+            }
+            for(BreakpointVo bp : breakpoints) {
+                if(bp.getFilename()==null) {
+                    continue;
+                }
+                if(bp.getLine()==null || spanDump.getLine()==null) {
+                    continue;
+                }
+                if(bp.getModuleId()!=null && !bp.getModuleId().equals(spanEntity.getModuleId())) {
+                    continue;
+                }
+                String spanFilename = spanStackTraceEntities.get(0).getFilename();
+                if(spanFilename==null) {
+                    continue;
+                }
+                if(!spanFilename.endsWith(bp.getFilename())) {
+                    continue;
+                }
+                // 如果行数间隔差距不超过1，算进入断点
+                int lineDistance = Math.abs(spanDump.getLine() - bp.getLine());
+                if(lineDistance<=1) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // 在spansAfterOrSelf中依次找到满足 (currentSpanId, currentSeqInSpan)之后并满足 stepType的下一个(spanId, seqInSpan)
         // 根据 stepType，要计算span的stackDepth判断是否暂停到断点
         for(SpanDumpItemEntity spanDumpEntity : spanDumpItemEntitiesAfter) {
@@ -88,7 +130,10 @@ public class TraceDebugService {
                         // default
                     } break;
                     case "continue": {
-                        // TODO: 继续运行直到遇到断点或者结束
+                        // 继续运行直到遇到断点或者结束
+                        if(breakpoints!=null && inBreakpoints.apply(spanDumpEntity, spanEntity)) {
+                            return new NextRequestResponseVo(traceId, spanDumpEntity.getSpanId(), spanDumpEntity.getSeqInSpan());
+                        }
                     } break;
                     default: {
                         // default

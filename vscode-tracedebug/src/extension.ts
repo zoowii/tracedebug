@@ -106,6 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	*/
 
+	// TODO: trace list view增加刷新功能，以及可以快速浏览一个traceId的调用链路
 	// 左侧活动试图增加一个trace list view
 	const traceNodeProvider = new TraceNodeProvider();
 	vscode.window.registerTreeDataProvider('traceNodes', traceNodeProvider);
