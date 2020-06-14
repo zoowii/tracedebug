@@ -11,6 +11,8 @@ import com.zoowii.tracedebug.models.SpanDumpItemEntity;
 import com.zoowii.tracedebug.models.SpanStackTraceEntity;
 import com.zoowii.tracedebug.models.TraceSpanEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// TODO: 使用spring cache
 @Slf4j
 @Service
 public class TraceSpanService {
@@ -31,6 +32,7 @@ public class TraceSpanService {
     @Resource
     private SpanStackTraceRepository spanStackTraceRepository;
 
+    @Cacheable("traceIdSpans")
     public List<TraceSpanEntity> findAllByTraceIdOrderByIdAsc(String traceId) {
         return traceSpanRepository.findAllByTraceIdOrderByIdAsc(traceId);
     }
@@ -42,10 +44,12 @@ public class TraceSpanService {
         return new BeanPage<>(traceIds, total);
     }
 
+    @Cacheable("spanCache")
     public TraceSpanEntity findSpanBySpanId(String spanId) {
         return traceSpanRepository.findBySpanId(spanId);
     }
 
+    @Cacheable("traceFirstSpan")
     public TraceSpanEntity findFirstSpanOfTrace(String traceId) {
         return traceSpanRepository.findFirstByTraceIdOrderByIdAsc(traceId);
     }
@@ -64,6 +68,7 @@ public class TraceSpanService {
         return spanStackTraceEntities;
     }
 
+    @Cacheable("spanDumpItems")
     public List<SpanDumpItemEntity> listSpanDumpItems(String spanId) {
         return spanDumpItemRepository.findAllBySpanIdOrderBySeqInSpan(spanId);
     }
@@ -76,6 +81,7 @@ public class TraceSpanService {
         return spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
     }
 
+    @Cacheable("spanFirstDump")
     public SpanDumpItemEntity findFirstDumpBySpanId(String spanId) {
         return spanDumpItemRepository.findFirstBySpanIdOrderByIdAsc(spanId);
     }
@@ -106,6 +112,7 @@ public class TraceSpanService {
         return stackVarSnapshot;
     }
 
+    @CacheEvict(value = {"traceIdSpans", "traceFirstSpan"}, key ="#record.getTraceId()")
     public TraceSpanEntity saveTraceSpan(TraceSpanEntity record) {
         return traceSpanRepository.save(record);
     }
@@ -114,6 +121,7 @@ public class TraceSpanService {
         return spanStackTraceRepository.save(record);
     }
 
+    @CacheEvict(value = {"spanDumpItems", "spanFirstDump"}, key = "#record.getSpanId()")
     public SpanDumpItemEntity saveSpanDumpItem(SpanDumpItemEntity record) {
         return spanDumpItemRepository.save(record);
     }

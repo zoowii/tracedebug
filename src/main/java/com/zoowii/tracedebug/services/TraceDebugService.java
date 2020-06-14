@@ -115,7 +115,6 @@ public class TraceDebugService {
                         spanDumpEntity.getSeqInSpan());
             } else {
                 // 当前spanId之后的span的情况，从小到大依次处理各seqInSpan的情况，根据stepType和stackDepth处理
-                // TODO: 根据breakpoints处理，也可能中途停下来
                 TraceSpanEntity spanEntity = traceSpanService.findSpanBySpanId(spanDumpEntity.getSpanId());
                 if(spanEntity==null) {
                     continue;
