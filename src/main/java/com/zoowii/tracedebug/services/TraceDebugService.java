@@ -101,7 +101,16 @@ public class TraceDebugService {
                 if("step_out".equals(stepType)) {
                     continue; // step out 需要跳出当前span
                 }
-                // TODO: when is "continue" stepType
+                if("continue".equals(stepType)) {
+                    TraceSpanEntity spanEntity = traceSpanService.findSpanBySpanId(spanDumpEntity.getSpanId());
+                    if(spanEntity==null) {
+                        continue;
+                    }
+                    if(breakpoints!=null && inBreakpoints.apply(spanDumpEntity, spanEntity)) {
+                        return new NextRequestResponseVo(traceId, spanDumpEntity.getSpanId(), spanDumpEntity.getSeqInSpan());
+                    }
+                    continue;
+                }
                 return new NextRequestResponseVo(traceId, spanDumpEntity.getSpanId(),
                         spanDumpEntity.getSeqInSpan());
             } else {
@@ -133,8 +142,10 @@ public class TraceDebugService {
                         // 继续运行直到遇到断点或者结束
                         if(breakpoints!=null && inBreakpoints.apply(spanDumpEntity, spanEntity)) {
                             return new NextRequestResponseVo(traceId, spanDumpEntity.getSpanId(), spanDumpEntity.getSeqInSpan());
+                        } else {
+                            continue;
                         }
-                    } break;
+                    }
                     default: {
                         // default
                     }
