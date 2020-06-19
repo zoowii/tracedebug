@@ -10,6 +10,7 @@ import { TraceDebugSession } from './traceDebug';
 import { setCurrentTraceId } from './traceRpcClient';
 import * as Net from 'net';
 import { TraceNodeProvider } from './traceExplorer';
+import { TraceInfoPanel } from './traceInfoPanel'
 
 /*
  * The compile time flag 'runMode' controls how the debug adapter is run.
@@ -25,6 +26,23 @@ export function activate(context: vscode.ExtensionContext) {
 			value: "readme.md"
 		});
 	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('extension.openTraceInfoPage', (traceId) => {
+		console.log('extension.openTraceInfoPage called trace  ', traceId)
+		// 打开一个web view页面展示trace的信息和调用链路等
+		TraceInfoPanel.createOrShow(context.extensionPath, traceId)
+	}))
+
+	if (vscode.window.registerWebviewPanelSerializer) {
+		// Make sure we register a serializer in activation event
+		vscode.window.registerWebviewPanelSerializer(TraceInfoPanel.viewType, {
+			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+				console.log(`Got state: ${state}`);
+				const traceId = state || ''
+				TraceInfoPanel.revive(webviewPanel, context.extensionPath, traceId);
+			}
+		});
+	}
 
 	context.subscriptions.push(vscode.commands.registerCommand('traceDebug.setTraceId', (traceId: string = '') => {
 		vscode.window.showInputBox({
@@ -106,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	*/
 
-	// TODO: trace list view增加刷新功能，以及可以快速浏览一个traceId的调用链路
+	// TODO: trace list view增加刷新功能
 	// 左侧活动试图增加一个trace list view
 	const traceNodeProvider = new TraceNodeProvider();
 	vscode.window.registerTreeDataProvider('traceNodes', traceNodeProvider);

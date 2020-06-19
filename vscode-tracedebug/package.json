@@ -60,7 +60,8 @@
 		"onDebugDynamicConfigurations:mock",
 		"onCommand:extension.trace-debug.getProgramName",
 		"onCommand:traceDebug.setTraceId",
-		"onView:traceNodes"
+		"onView:traceNodes",
+		"onWebviewPanel:traceInfo"
 	],
 	"contributes": {
 		"breakpoints": [

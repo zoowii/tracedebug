@@ -130,4 +130,8 @@ public class TraceSpanService {
         return spanStackTraceRepository.findFirstBySpanIdAndStackIndex(spanId, stackIndex);
     }
 
+    public SpanStackTraceEntity findFirstStackTraceBySpanId(String spanId) {
+        return spanStackTraceRepository.findFirstBySpanIdOrderByIdAsc(spanId);
+    }
+
 }

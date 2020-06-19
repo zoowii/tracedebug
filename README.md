@@ -21,3 +21,7 @@ trace-debug
 * js前端请求java web后端，然后根据日志回溯调试
 
 ![trace_debug_example.gif](docs/trace_debug_example.gif)
+
+* 查看trace的调用链路
+
+![trace_debug_trace_view.png](docs/trace_debug_trace_view.png)

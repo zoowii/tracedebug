@@ -128,3 +128,7 @@ export function getCurrentTraceId(): string {
 export function getCurrentSpanId(): string | undefined {
 	return currentSpanId
 }
+
+export function getRpcEndpoint(): string {
+	return endpoint
+}

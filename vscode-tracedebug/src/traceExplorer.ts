@@ -64,7 +64,12 @@ export class TraceNodeProvider implements vscode.TreeDataProvider<vscode.TreeIte
 		const res = await rpcClient.listTraces()
 		console.log('trace list', res)
 		const toNode = (traceItem: any): TraceNode => {
-			return new TraceNode(traceItem, traceItem, vscode.TreeItemCollapsibleState.Collapsed)
+			return new TraceNode(traceItem, traceItem, vscode.TreeItemCollapsibleState.Collapsed,
+				{
+					command: 'extension.openTraceInfoPage',
+					title: '',
+					arguments: [traceItem]
+				})
 		}
 		const traceNodes = res.data.map(toNode)
 		return traceNodes

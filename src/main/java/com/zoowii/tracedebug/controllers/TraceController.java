@@ -15,7 +15,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @CrossOrigin
@@ -134,6 +136,49 @@ public class TraceController {
     public List<TraceSpanEntity> listTraceSpans(@PathVariable("traceId") String traceId) {
         List<TraceSpanEntity> spanEntities = traceSpanService.findAllByTraceIdOrderByIdAsc(traceId);
         return spanEntities;
+    }
+
+    /**
+     * 获取某个traceId的调用链路的各栈顶
+     */
+    @GetMapping("/list_top_calls/{traceId}")
+    public List<TraceCallVo> listTraceTopCalls(@PathVariable("traceId") String traceId) {
+        List<SpanDumpItemEntity> allSpanDumps = traceSpanService.findAllDumpsByTraceIdAndIdGreaterThanOrderByIdAsc(traceId, 0);
+        List<SpanDumpItemEntity> resultDumps = new ArrayList<>();
+        SpanDumpItemEntity before = null;
+        for(SpanDumpItemEntity spanDumpItem : allSpanDumps) {
+            // 连续两个一样的spanId的dump，只返回前一个
+            try {
+                if (before == null) {
+                    resultDumps.add(spanDumpItem);
+                    continue;
+                }
+                if (before.getSpanId() == null) {
+                    continue;
+                }
+                if (before.getSpanId().equals(spanDumpItem.getSpanId())) {
+                    continue;
+                }
+                resultDumps.add(spanDumpItem);
+            } finally {
+                before = spanDumpItem;
+            }
+        }
+        List<TraceCallVo> result = resultDumps.stream()
+                .map(dumpEntity -> {
+                    SpanStackTraceEntity spanFirstStackTrace = traceSpanService.findFirstStackTraceBySpanId(
+                            dumpEntity.getSpanId());
+                    String moduleId = spanFirstStackTrace != null ? spanFirstStackTrace.getModuleId() : null;
+                    String classname = spanFirstStackTrace != null ? spanFirstStackTrace.getClassname() : null;
+                    String methodName = spanFirstStackTrace != null ? spanFirstStackTrace.getMethodName() : null;
+                    String filename = spanFirstStackTrace != null ? spanFirstStackTrace.getFilename() : null;
+                    Integer line = dumpEntity.getLine();
+
+                    return new TraceCallVo(
+                            dumpEntity.getTraceId(), dumpEntity.getSpanId(),
+                            moduleId, classname, methodName, filename, line);
+                }).collect(Collectors.toList());
+        return result;
     }
 
     @GetMapping("/span/{spanId}")
