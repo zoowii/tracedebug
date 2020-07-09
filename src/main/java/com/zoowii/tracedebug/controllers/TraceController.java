@@ -1,6 +1,6 @@
 package com.zoowii.tracedebug.controllers;
 
-import com.zoowii.tracedebug.aspects.RequestLog;
+import com.zoowii.tracedebug.spring.aspects.RequestLog;
 import com.zoowii.tracedebug.controllers.vo.*;
 import com.zoowii.tracedebug.exceptions.SpanNotFoundException;
 import com.zoowii.tracedebug.http.BeanPage;

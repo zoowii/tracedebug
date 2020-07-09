@@ -1,7 +1,8 @@
-package com.zoowii.tracedebug.components;
+package com.zoowii.tracedebug.spring.executors;
 
 import classinjector.AsyncMysqlStackDumpProcessor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -9,10 +10,9 @@ import javax.annotation.PreDestroy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Slf4j
 @Component
 public class TraceDebugDbExecutor implements InitializingBean {
-
+    private Logger log = LoggerFactory.getLogger(TraceDebugDbExecutor.class);
 
     private ExecutorService singletonExecutor;
 

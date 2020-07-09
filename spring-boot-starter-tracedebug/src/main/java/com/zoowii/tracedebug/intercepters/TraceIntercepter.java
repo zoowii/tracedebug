@@ -1,7 +1,8 @@
-package com.zoowii.tracedebug.intercepters;
+package com.zoowii.tracedebug.spring.intercepters;
 
 import classinjector.TraceContext;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -10,9 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
-@Slf4j
 @Component
 public class TraceIntercepter implements HandlerInterceptor {
+    private Logger log = LoggerFactory.getLogger(TraceIntercepter.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {

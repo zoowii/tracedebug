@@ -9,75 +9,34 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.zoowii</groupId>
-	<artifactId>tracedebug</artifactId>
+	<artifactId>spring-boot-starter-tracedebug</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>tracedebug</name>
-	<description>Demo project for Spring Boot</description>
+	<name>spring-boot-starter-tracedebug</name>
+	<description>tracedebug starter for spring boot</description>
+	<packaging>jar</packaging>
 
 	<properties>
+		<spring.boot.version>2.2.7.RELEASE</spring.boot.version>
 		<java.version>1.8</java.version>
 		<logback.version>1.2.3</logback.version>
 		<logback.spring.version>0.1.4</logback.spring.version>
 		<jtraceinject.version>1.0-SNAPSHOT</jtraceinject.version>
-		<tracedebug.starter.version>0.0.1-SNAPSHOT</tracedebug.starter.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-quartz</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -171,20 +130,11 @@
 			<artifactId>jtraceinject</artifactId>
 			<version>${jtraceinject.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.zoowii</groupId>
-			<artifactId>spring-boot-starter-tracedebug</artifactId>
-			<version>${tracedebug.starter.version}</version>
-		</dependency>
 
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
 		</plugins>
 	</build>
 

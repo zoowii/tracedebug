@@ -1,4 +1,4 @@
-package com.zoowii.tracedebug.aspects;
+package com.zoowii.tracedebug.spring.aspects;
 
 import org.springframework.core.annotation.AliasFor;
 

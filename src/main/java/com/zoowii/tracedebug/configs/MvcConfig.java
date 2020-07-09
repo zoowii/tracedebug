@@ -1,6 +1,6 @@
 package com.zoowii.tracedebug.configs;
 
-import com.zoowii.tracedebug.intercepters.TraceIntercepter;
+import com.zoowii.tracedebug.spring.intercepters.TraceIntercepter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;

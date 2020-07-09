@@ -13,6 +13,7 @@ trace-debug
 * 日志埋点 javascript sdk
 * 日志回溯调试器的vscode扩展
 * 日志回溯式调试器的web后端
+* 用于spring boot项目注入日志埋点的spring boot starter模块
 * 简单java项目回溯调试的例子
 * javascript + spring boot的完整前后端用日志回溯调试的例子
 

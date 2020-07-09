@@ -1,18 +1,21 @@
-package com.zoowii.tracedebug.aspects;
+package com.zoowii.tracedebug.spring.aspects;
 
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 import java.lang.reflect.Method;
 
-@Slf4j
 @Component
 @Aspect
 public class RequestLogAspect {
+    private Logger log = LoggerFactory.getLogger(RequestLogAspect.class);
+
     private String arrayToString(Object[] args) {
         if(args == null) {
             return "null";

@@ -1,9 +1,10 @@
-package com.zoowii.tracedebug.aspects;
+package com.zoowii.tracedebug.spring.aspects;
 
 import classinjector.ClassInjector;
 import classinjector.ITraceInjected;
 import classinjector.TraceInjectedType;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -25,10 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 @Component
 public class TraceAspectProxy implements ApplicationContextAware, BeanFactoryPostProcessor,
         BeanDefinitionRegistryPostProcessor {
+    private Logger log = LoggerFactory.getLogger(TraceAspectProxy.class);
+
     private ApplicationContext applicationContext;
 
     @Override
