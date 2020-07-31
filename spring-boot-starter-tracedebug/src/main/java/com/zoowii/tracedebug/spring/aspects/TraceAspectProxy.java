@@ -3,12 +3,11 @@ package com.zoowii.tracedebug.spring.aspects;
 import classinjector.ClassInjector;
 import classinjector.ITraceInjected;
 import classinjector.TraceInjectedType;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -16,9 +15,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -83,6 +80,9 @@ public class TraceAspectProxy implements ApplicationContextAware, BeanFactoryPos
             }
             Class<?> beanCls;
             try {
+                if (clsName.contains("$$EnhancerBySpringCGLIB$$")) {
+                    continue;
+                }
                 beanCls = Class.forName(clsName);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();

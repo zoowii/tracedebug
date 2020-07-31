@@ -1,6 +1,5 @@
 package com.zoowii.tracedebug.daos;
 
-import com.zoowii.tracedebug.http.BeanPaginator;
 import com.zoowii.tracedebug.models.TraceSpanEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

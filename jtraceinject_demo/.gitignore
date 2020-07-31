@@ -8,4 +8,5 @@
 /logs
 /*.log
 /out
+/injected_classes
 *~

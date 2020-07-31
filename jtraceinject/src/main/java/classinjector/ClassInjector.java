@@ -5,9 +5,14 @@ import org.aspectj.apache.bcel.Repository;
 import org.aspectj.apache.bcel.classfile.*;
 import org.aspectj.apache.bcel.classfile.annotation.AnnotationGen;
 import org.aspectj.apache.bcel.generic.*;
+import org.aspectj.apache.bcel.util.SyntheticRepository;
 import org.objectweb.asm.Opcodes;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 public class ClassInjector {
@@ -123,13 +128,13 @@ public class ClassInjector {
         List<Instruction> loadVarInsts = new ArrayList<Instruction>();
 
         // 如果是局部变量并且当前位置在局部变量定义生命周期之外，也不注入
-        if(localVariable.getStartPC() > before.getPosition()) {
+        if (localVariable.getStartPC() > before.getPosition()) {
             return;
         }
 
         if (!(localVarType instanceof ObjectType)) {
             // TODO: 如果是基本类型，需要把基本类型转换成Object类型然后dump
-            if(localVarType.getSignature().equals(Type.INT.getSignature())) {
+            if (localVarType.getSignature().equals(Type.INT.getSignature())) {
                 // 是int类型时，调用 Integer.valueOf(value)
                 loadVarInsts.add(factory.createLoad(Type.INT, localVariable.getIndex()));
                 loadVarInsts.add(factory.createInvoke("java.lang.Integer", "valueOf",
@@ -140,12 +145,12 @@ public class ClassInjector {
             // 加载对象类型的局部变量
             loadVarInsts.add(factory.createLoad(localVarType, localVariable.getIndex()));
         }
-        if(loadVarInsts.isEmpty()) {
+        if (loadVarInsts.isEmpty()) {
             return;
         }
         instructionList.insert(before, factory.createLoad(Type.STRING, spanIdVarIndex));
         instructionList.insert(before, factory.createConstant(localVariable.getName()));
-        for(Instruction inst : loadVarInsts) {
+        for (Instruction inst : loadVarInsts) {
             instructionList.insert(before, inst);
         }
         int lineNumber = -1; // before所在行号
@@ -212,11 +217,21 @@ public class ClassInjector {
     public <T> Class<? extends T> addDumpToMethods(Class<? extends T> sourceClass, List<Method> methods, String newClsName) throws Exception {
         JavaClass cls = Repository.lookupClass(sourceClass.getName());
         // 继承原类
+        if (cls == null) {
+            if (Repository.getRepository() instanceof SyntheticRepository) {
+                SyntheticRepository syntheticRepository = (SyntheticRepository) Repository.getRepository();
+                syntheticRepository.loadClass(sourceClass);
+            }
+            cls = Repository.lookupClass(sourceClass.getName());
+            if (cls == null) {
+                throw new TraceInjectException("can't find class " + sourceClass.getName() + " in repository");
+            }
+        }
         ConstantPool cpool = cls.getConstantPool();
         String packageName = sourceClass.getPackage().getName();
         String sourceOnlyFilename = cls.getSourceFileName();
         String targetFilename;
-        if(packageName.isEmpty()) {
+        if (packageName.isEmpty()) {
             targetFilename = sourceOnlyFilename;
         } else {
             targetFilename = packageName.replaceAll("[.]", "/") + "/" + sourceOnlyFilename;
@@ -232,7 +247,7 @@ public class ClassInjector {
 
         // 原类的注解也要加上
         for (AnnotationGen anno : cls.getAnnotations()) {
-            if(anno.getTypeName().equals(TraceInjectedType.class.getName())) {
+            if (anno.getTypeName().equals(TraceInjectedType.class.getName())) {
                 continue; // 跳过  @TraceInjectedType 注解
             }
             cg.addAnnotation(anno);
@@ -300,9 +315,88 @@ public class ClassInjector {
 
         cls = cg.getJavaClass();
 
-//        Repository.addClass(cls);
-        cls.dump("target/classes/" + cls.getClassName().replace(".", "/") + ".class");
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        cls.dump(bos);
+        if (new File("./target").exists()) {
+            // 如果当前文件夹下存在target目录
+            cls.dump("target/classes/" + cls.getClassName().replace(".", File.separator) + ".class");
+        }
+        // 临时类要用classLoader加载
+        System.out.println("new injected class name " + cls.getClassName());
+        memoryClassLoader.addClass(cls.getClassName(), bos.toByteArray());
 
-        return (Class<? extends T>) Class.forName(cls.getClassName());
+        File tmpClassFile = new File(tmpDir + File.separator + cls.getClassName().replace(".", File.separator) + ".class");
+        if (tmpClassFile.exists()) {
+            tmpClassFile.delete();
+        }
+        cls.dump(tmpClassFile);
+        System.out.println("add file " + tmpClassFile.toURI() + " to url class loader");
+
+
+        Class<? extends T> loadedCls;
+        try {
+            loadedCls = (Class<? extends T>) Class.forName(cls.getClassName());
+            if (loadedCls != null) {
+                return loadedCls;
+            }
+        } catch (ClassNotFoundException e) {
+            loadedCls = null;
+        }
+        loadedCls = (Class<? extends T>) memoryClassLoader.loadClass(cls.getClassName());
+        return loadedCls;
+    }
+
+    private static final String tmpDir = new File(System.getProperty("user.dir"))
+            + File.separator + "injected_classes";
+//            System.getProperty("java.io.tmpdir") + File.separator + "injected_classes";
+
+    static {
+        addClass(new File(tmpDir), null);
+    }
+
+    public static final MemoryClassLoader memoryClassLoader = new MemoryClassLoader();
+    private static ClassLoader injectorClassLoader = getDefaultClassLoader();
+    private static Method addURL = initAddMethod();
+    private static Method addClassMethod = initAddClassMethod();
+
+    private static ClassLoader getDefaultClassLoader() {
+        ClassLoader cl = ClassInjector.class.getClassLoader();
+        return cl;
+    }
+
+    private static Method initAddMethod() {
+        try {
+            Method add = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+            add.setAccessible(true);
+            return add;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Method initAddClassMethod() {
+        ClassLoader cl = ClassInjector.class.getClassLoader();
+        try {
+            Method method = cl.getClass().getDeclaredMethod("addClass", new Class[]{Class.class});
+            method.setAccessible(true);
+            return method;
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+    }
+
+    private static void addClass(File file, Class<?> cls) {
+        try {
+            if (file != null && addURL != null) {
+                addURL.invoke(injectorClassLoader, new Object[]{file.toURI().toURL()});
+                System.out.println("added " + file.toURI().toURL() + " to url class loader");
+            }
+            if (cls != null && addClassMethod != null) {
+                addClassMethod.invoke(injectorClassLoader, new Object[]{cls});
+                System.out.println("added class " + cls.getName() + " to class loader");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

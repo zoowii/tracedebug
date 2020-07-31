@@ -1,8 +1,8 @@
 package com.zoowii.tracedebug.spring.executors;
 
 import classinjector.AsyncMysqlStackDumpProcessor;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class TraceDebugDbExecutor implements InitializingBean {
 
     @PreDestroy
     public void shutdown() {
-        if(singletonExecutor!=null) {
+        if (singletonExecutor != null) {
             singletonExecutor.shutdown();
         }
     }

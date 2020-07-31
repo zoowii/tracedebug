@@ -38,24 +38,24 @@ public class BeanPaginator implements Pageable, Serializable {
 
     @Override
     public int getPageSize() {
-        if(maxPageSize>0 && pageSize > maxPageSize) {
+        if (maxPageSize > 0 && pageSize > maxPageSize) {
             this.pageSize = maxPageSize;
         }
-        if(this.pageSize<=0) {
+        if (this.pageSize <= 0) {
             this.pageSize = 1;
         }
         return this.pageSize;
     }
 
     public int getPage() {
-        if(page<=0) {
+        if (page <= 0) {
             page = 1;
         }
         return page;
     }
 
     public long getOffset() {
-        return (getPage()-1) * getPageSize();
+        return (getPage() - 1) * getPageSize();
     }
 
     public int getLimit() {
@@ -64,16 +64,16 @@ public class BeanPaginator implements Pageable, Serializable {
 
     @Override
     public int getPageNumber() {
-        return getPage()-1;
+        return getPage() - 1;
     }
 
     @Override
     public Pageable next() {
-        return new BeanPaginator(getPage()+1, getPageSize(), getMaxPageSize(), getSort(), getSortBy());
+        return new BeanPaginator(getPage() + 1, getPageSize(), getMaxPageSize(), getSort(), getSortBy());
     }
 
     public BeanPaginator previous() {
-        return hasPrevious() ? new BeanPaginator(getPage()-1, getPageSize(), getMaxPageSize(), getSort(), getSortBy()) : this;
+        return hasPrevious() ? new BeanPaginator(getPage() - 1, getPageSize(), getMaxPageSize(), getSort(), getSortBy()) : this;
     }
 
 
@@ -122,11 +122,11 @@ public class BeanPaginator implements Pageable, Serializable {
 
     @Override
     public Sort getSort() {
-        if(sort == null) {
-            if(!StringUtils.isEmpty(sortBy)) {
-                if(sortBy.startsWith("+")) {
+        if (sort == null) {
+            if (!StringUtils.isEmpty(sortBy)) {
+                if (sortBy.startsWith("+")) {
                     return Sort.by(Sort.Direction.ASC, sortBy.substring(1));
-                } else if(sortBy.startsWith("-")) {
+                } else if (sortBy.startsWith("-")) {
                     return Sort.by(Sort.Direction.DESC, sortBy.substring(1));
                 } else {
                     return Sort.by(Sort.Direction.ASC, sortBy);

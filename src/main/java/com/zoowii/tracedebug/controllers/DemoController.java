@@ -1,7 +1,7 @@
 package com.zoowii.tracedebug.controllers;
 
-import com.zoowii.tracedebug.spring.aspects.DebugTrace;
 import com.zoowii.tracedebug.services.HelloService;
+import com.zoowii.tracedebug.spring.aspects.DebugTrace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

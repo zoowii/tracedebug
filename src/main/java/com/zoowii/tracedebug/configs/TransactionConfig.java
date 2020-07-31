@@ -7,8 +7,8 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.*;
 
 import java.util.Collections;
@@ -22,10 +22,10 @@ public class TransactionConfig {
     private static final int TX_METHOD_TIMEOUT = 5;
 
     // 只对service的实现方法进行事务控制
-    private static final String AOP_POINTCUT_EXPRESSION = "execution(public * ex.walletd.walletd_admin.services.impl.*Impl.*(..))";
+    private static final String AOP_POINTCUT_EXPRESSION = "execution(public * com.zoowii.tracedebug.services.impl.*Impl.*(..))";
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
+    private TransactionManager transactionManager;
 
     @Bean
     public TransactionInterceptor txAdvice() {
@@ -34,7 +34,7 @@ public class TransactionConfig {
         /*只读事务，不做更新操作*/
         RuleBasedTransactionAttribute readOnlyTx = new RuleBasedTransactionAttribute();
         readOnlyTx.setReadOnly(true);
-        readOnlyTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED );
+        readOnlyTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 
         /*当前存在事务就使用当前事务，当前不存在事务就创建一个新的事务*/
         RuleBasedTransactionAttribute requiredTx = new RuleBasedTransactionAttribute();
@@ -60,7 +60,7 @@ public class TransactionConfig {
         txMap.put("import*", requiredTx);
         txMap.put("save*", requiredTx);
 
-        source.setNameMap( txMap );
+        source.setNameMap(txMap);
         TransactionInterceptor txAdvice = new TransactionInterceptor(transactionManager, source);
         return txAdvice;
     }

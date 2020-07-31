@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 尽量别用绝对路径，如果带参数不同容器路径解释可能不同,以下配置参数在pom.xml里 -->
-    <property name="log.root.level" value="INFO" /> <!-- 日志级别 -->
-    <property name="log.base" value="logs/" /> <!-- 日志路径，这里是相对路径，web项目eclipse下会输出到eclipse的安装目录下，如果部署到linux上的tomcat下，会输出到tomcat/bin目录 下 -->
-    <property name="log.moduleName" value="tracedebug" />  <!-- 模块名称， 影响日志配置名，日志文件名 -->
-    <property name="log.max.size" value="1000MB" /> <!-- 日志文件大小,超过这个大小将被压缩 -->
+    <property name="log.root.level" value="INFO"/> <!-- 日志级别 -->
+    <property name="log.base"
+              value="logs/"/> <!-- 日志路径，这里是相对路径，web项目eclipse下会输出到eclipse的安装目录下，如果部署到linux上的tomcat下，会输出到tomcat/bin目录 下 -->
+    <property name="log.moduleName" value="tracedebug"/>  <!-- 模块名称， 影响日志配置名，日志文件名 -->
+    <property name="log.max.size" value="1000MB"/> <!-- 日志文件大小,超过这个大小将被压缩 -->
 
     <!--控制台输出 -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
@@ -40,19 +41,19 @@
         <discardingThreshold>0</discardingThreshold>
         <queueSize>256</queueSize>
         <includeCallerData>true</includeCallerData>
-        <appender-ref ref="file.all" />
+        <appender-ref ref="file.all"/>
     </appender>
 
     <!-- 为某个包下的所有类的指定Appender 这里也可以指定类名称例如：com.aa.bb.ClassName -->
-    <logger name="ex.walletd" additivity="false">
-        <level value="${log.root.level}" />
-        <appender-ref ref="stdout" />
-        <appender-ref ref="file.async" /><!-- 即com.lin包下级别为 ${log.root.level}的才会使用file.async来打印 -->
+    <logger name="com.zoowii.tracedebug" additivity="false">
+        <level value="${log.root.level}"/>
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file.async"/><!-- 即com.lin包下级别为 ${log.root.level}的才会使用file.async来打印 -->
     </logger>
 
     <!-- root将级别为${log.root.level}及大于${log.root.level}的日志信息交给已经配置好的名为“Console”的appender处理，“Console”appender将信息打印到Console,其它同理 -->
     <root level="${log.root.level}">
-        <appender-ref ref="stdout" /> <!--  标识这个appender将会添加到这个logger -->
-        <appender-ref ref="file.async" />
+        <appender-ref ref="stdout"/> <!--  标识这个appender将会添加到这个logger -->
+        <appender-ref ref="file.async"/>
     </root>
 </configuration>

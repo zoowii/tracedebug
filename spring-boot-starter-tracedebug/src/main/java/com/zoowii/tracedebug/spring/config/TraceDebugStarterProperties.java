@@ -1,7 +1,6 @@
 package com.zoowii.tracedebug.spring.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.beans.factory.annotation.Value;
 
 @ConfigurationProperties(prefix = "tracedebug")
 public class TraceDebugStarterProperties {
@@ -35,6 +34,7 @@ public class TraceDebugStarterProperties {
             this.password = password;
         }
     }
+
     private DataSourceProp datasource;
     private String moduleId;
 
@@ -53,5 +53,5 @@ public class TraceDebugStarterProperties {
     public void setModuleId(String moduleId) {
         this.moduleId = moduleId;
     }
-    
+
 }

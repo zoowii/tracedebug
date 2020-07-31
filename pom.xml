@@ -15,6 +15,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
+		<spring.boot.version>2.2.7.RELEASE</spring.boot.version>
 		<java.version>1.8</java.version>
 		<logback.version>1.2.3</logback.version>
 		<logback.spring.version>0.1.4</logback.spring.version>
@@ -38,10 +39,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
@@ -123,7 +120,7 @@
 		<dependency>
 			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java</artifactId>
-			<version>3.1.02</version>
+			<version>3.8.06</version>
 		</dependency>
 
 		<!-- guava -->
@@ -137,7 +134,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 

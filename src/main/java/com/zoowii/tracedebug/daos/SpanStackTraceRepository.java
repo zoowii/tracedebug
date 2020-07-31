@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface SpanStackTraceRepository extends CrudRepository<SpanStackTraceEntity, Long> {
     List<SpanStackTraceEntity> findAllBySpanIdOrderByStackIndexAsc(String spanId);
+
     SpanStackTraceEntity findFirstBySpanIdAndStackIndex(String spanId, Integer stackIndex);
+
     SpanStackTraceEntity findFirstBySpanIdOrderByIdAsc(String spanId);
 }
 

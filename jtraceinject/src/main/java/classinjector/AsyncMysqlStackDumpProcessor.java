@@ -26,7 +26,7 @@ public class AsyncMysqlStackDumpProcessor extends MysqlStackDumpProcessor {
 
     @Override
     public void onSpanStart(String spanId, List<StackTraceElement> stackTrace, int stackDepth) {
-        if(executorService==null) {
+        if (executorService == null) {
             log.warn(this.getClass().getName() + " not set executorService yet");
             return;
         }
@@ -46,7 +46,7 @@ public class AsyncMysqlStackDumpProcessor extends MysqlStackDumpProcessor {
 
     @Override
     public void onDump(String spanId, int seqInSpan, String name, WeakReference<Object> valueRef, int lineNumber) {
-        if(executorService==null) {
+        if (executorService == null) {
             log.warn(this.getClass().getName() + " not set executorService yet");
             return;
         }

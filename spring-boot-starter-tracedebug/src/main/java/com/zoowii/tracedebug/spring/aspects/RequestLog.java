@@ -12,7 +12,9 @@ import java.lang.annotation.Target;
 public @interface RequestLog {
     @AliasFor("request")
     boolean value() default true;
+
     @AliasFor("value")
     boolean request() default true;
+
     boolean response() default false;
 }

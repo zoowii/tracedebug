@@ -1,8 +1,8 @@
 package com.zoowii.tracedebug.spring.intercepters;
 
 import classinjector.TraceContext;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -19,7 +19,7 @@ public class TraceIntercepter implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         String traceId = request.getParameter("TRACE_ID");
-        if(!StringUtils.isEmpty(traceId)) {
+        if (!StringUtils.isEmpty(traceId)) {
             TraceContext.setCurrentTraceId(traceId);
             log.info("current traceId={}", traceId);
         } else {

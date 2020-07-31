@@ -39,7 +39,7 @@ public class TraceSpanService {
 
     public BeanPage<String> listTraceIds(BeanPaginator paginator) {
         List<Map<String, Object>> items = traceSpanRepository.findAllDistinctTraceIds(paginator.getOffset(), paginator.getLimit());
-        List<String> traceIds = items.stream().map(x->x.get("trace_id").toString()).collect(Collectors.toList());
+        List<String> traceIds = items.stream().map(x -> x.get("trace_id").toString()).collect(Collectors.toList());
         long total = traceSpanRepository.countDistinctTraceIds();
         return new BeanPage<>(traceIds, total);
     }
@@ -56,12 +56,12 @@ public class TraceSpanService {
 
     public List<SpanStackTraceEntity> listSpanStackTrace(String spanId, Integer seqInSpan) {
         List<SpanStackTraceEntity> spanStackTraceEntities = spanStackTraceRepository.findAllBySpanIdOrderByStackIndexAsc(spanId);
-        if(spanStackTraceEntities.isEmpty()) {
+        if (spanStackTraceEntities.isEmpty()) {
             return spanStackTraceEntities;
         }
-        if(seqInSpan != null) {
+        if (seqInSpan != null) {
             SpanDumpItemEntity spanDumpItemEntity = spanDumpItemRepository.findFirstBySpanIdAndSeqInSpanOrderByIdAsc(spanId, seqInSpan);
-            if(spanDumpItemEntity != null) {
+            if (spanDumpItemEntity != null) {
                 spanStackTraceEntities.get(0).setLine(spanDumpItemEntity.getLine());
             }
         }
@@ -97,22 +97,22 @@ public class TraceSpanService {
     public StackVarSnapshotVo listAllMergedSpanDumpsBySpanIdAndSeqInSpan(String spanId, int seqInSpan) {
         List<SpanDumpItemEntity> spanDumpItemsOfSpan = spanDumpItemRepository.findAllBySpanIdOrderBySeqInSpan(spanId);
         spanDumpItemsOfSpan = spanDumpItemsOfSpan.stream()
-                .filter(x -> x.getSeqInSpan()!=null && x.getSeqInSpan()<=seqInSpan)
+                .filter(x -> x.getSeqInSpan() != null && x.getSeqInSpan() <= seqInSpan)
                 .collect(Collectors.toList());
         Map<String, String> mergedValues = new HashMap<>();
-        for(SpanDumpItemEntity item : spanDumpItemsOfSpan) {
+        for (SpanDumpItemEntity item : spanDumpItemsOfSpan) {
             mergedValues.put(item.getName(), item.getValue());
         }
         StackVarSnapshotVo stackVarSnapshot = new StackVarSnapshotVo();
         stackVarSnapshot.setVariableValues(new ArrayList<>());
-        for(String name : mergedValues.keySet()) {
+        for (String name : mergedValues.keySet()) {
             String value = mergedValues.get(name);
             stackVarSnapshot.getVariableValues().add(new VarValueVo(name, value));
         }
         return stackVarSnapshot;
     }
 
-    @CacheEvict(value = {"traceIdSpans", "traceFirstSpan"}, key ="#record.getTraceId()")
+    @CacheEvict(value = {"traceIdSpans", "traceFirstSpan"}, key = "#record.getTraceId()")
     public TraceSpanEntity saveTraceSpan(TraceSpanEntity record) {
         return traceSpanRepository.save(record);
     }

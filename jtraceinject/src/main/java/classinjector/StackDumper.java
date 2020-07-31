@@ -1,7 +1,10 @@
 package classinjector;
 
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,7 +14,7 @@ public class StackDumper {
 
     static {
         TraceContext.load();
-        
+
         ServiceLoader<IStackDumpProcessor> dumpProcessorServiceLoader = ServiceLoader.load(IStackDumpProcessor.class);
         for (IStackDumpProcessor processor : dumpProcessorServiceLoader) {
             try {
@@ -51,13 +54,13 @@ public class StackDumper {
     private static boolean isNeedIgnoreInternalStackTraceElement(StackTraceElement stackTraceElement) {
         String className = stackTraceElement.getClassName();
         String methodName = stackTraceElement.getMethodName();
-        if(className.startsWith("java.base/jdk.internal.reflect")) {
+        if (className.startsWith("java.base/jdk.internal.reflect")) {
             return true;
         }
-        if(className.startsWith("jdk.internal.reflect")) {
+        if (className.startsWith("jdk.internal.reflect")) {
             return true;
         }
-        if(className.startsWith("org.junit.runners")) {
+        if (className.startsWith("org.junit.runners")) {
             return true;
         }
         return false;
@@ -74,14 +77,14 @@ public class StackDumper {
             List<StackTraceElement> stackTraceElements = new ArrayList<>();
 
             // 因为深度限制，所以需要从某个stackTraceElement(className+methodName)作为顶层开始计算栈的深度
-            for(StackTraceElement stackTraceElement : rawStackTrace) {
-                if(isNeedIgnoreInternalStackTraceElement(stackTraceElement)) {
+            for (StackTraceElement stackTraceElement : rawStackTrace) {
+                if (isNeedIgnoreInternalStackTraceElement(stackTraceElement)) {
                     break;
                 }
                 stackTraceElements.add(stackTraceElement);
             }
             // stackTrace第一层是 Thread.getStackTrace，需要排除
-            if(!stackTraceElements.isEmpty()) {
+            if (!stackTraceElements.isEmpty()) {
                 stackTraceElements.remove(0);
             }
             int stackDepth = stackTraceElements.size();

@@ -14,7 +14,7 @@ import java.util.Date;
 @ToString
 public class SpanDumpItemEntity {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "created_at", nullable = false, columnDefinition = "datetime DEFAULT CURRENT_TIMESTAMP", updatable = false, insertable = false)
     private Date createdAt;

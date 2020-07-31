@@ -5,7 +5,6 @@ import com.zoowii.tracedebug.controllers.vo.StackVarSnapshotVo;
 import com.zoowii.tracedebug.controllers.vo.StepStackForm;
 import com.zoowii.tracedebug.controllers.vo.ViewStackVariablesForm;
 import com.zoowii.tracedebug.http.BeanPage;
-import com.zoowii.tracedebug.http.BeanPaginator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;

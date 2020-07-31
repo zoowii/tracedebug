@@ -1,6 +1,5 @@
 package com.zoowii.tracedebug.controllers;
 
-import com.zoowii.tracedebug.spring.aspects.RequestLog;
 import com.zoowii.tracedebug.controllers.vo.*;
 import com.zoowii.tracedebug.exceptions.SpanNotFoundException;
 import com.zoowii.tracedebug.http.BeanPage;
@@ -10,6 +9,7 @@ import com.zoowii.tracedebug.models.SpanStackTraceEntity;
 import com.zoowii.tracedebug.models.TraceSpanEntity;
 import com.zoowii.tracedebug.services.TraceDebugService;
 import com.zoowii.tracedebug.services.TraceSpanService;
+import com.zoowii.tracedebug.spring.aspects.RequestLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +31,7 @@ public class TraceController {
 
     /**
      * 开启新span时上报接口
+     *
      * @return
      */
     @RequestLog
@@ -42,20 +43,20 @@ public class TraceController {
             @RequestParam("module_id") String moduleId,
             @RequestParam("classname") String classname,
             @RequestParam("method") String methodName) {
-        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
+        if (StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
             return "empty traceId or spanId";
         }
         TraceSpanEntity traceSpanEntity = traceSpanService.findSpanBySpanId(spanId);
-        if(traceSpanEntity != null) {
+        if (traceSpanEntity != null) {
             return "duplicate spanId";
         }
         traceSpanEntity = new TraceSpanEntity();
         traceSpanEntity.setTraceId(traceId);
         traceSpanEntity.setSpanId(spanId);
-        traceSpanEntity.setStackDepth(stackDepth!=null?stackDepth:0);
-        traceSpanEntity.setModuleId(moduleId!=null?moduleId:"");
-        traceSpanEntity.setClassname(classname!=null?classname:"");
-        traceSpanEntity.setMethodName(methodName!=null?methodName:"");
+        traceSpanEntity.setStackDepth(stackDepth != null ? stackDepth : 0);
+        traceSpanEntity.setModuleId(moduleId != null ? moduleId : "");
+        traceSpanEntity.setClassname(classname != null ? classname : "");
+        traceSpanEntity.setMethodName(methodName != null ? methodName : "");
 
         traceSpanEntity = traceSpanService.saveTraceSpan(traceSpanEntity);
 
@@ -78,20 +79,20 @@ public class TraceController {
             @RequestParam("filename") String filename
     ) {
         // 保持幂等性避免(spanId, stackIndex)重复插入
-        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
+        if (StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId)) {
             return "empty traceId or spanId";
         }
         SpanStackTraceEntity spanStackTraceEntity = traceSpanService.findSpanStackTraceBySpanIdAndStackIndex(spanId, stackIndex);
-        if(spanStackTraceEntity!=null) {
+        if (spanStackTraceEntity != null) {
             return "duplicate spanId and stackIndex";
         }
         spanStackTraceEntity = new SpanStackTraceEntity();
         spanStackTraceEntity.setTraceId(traceId);
         spanStackTraceEntity.setSpanId(spanId);
-        spanStackTraceEntity.setStackIndex(stackIndex!=null?stackIndex:-1);
-        spanStackTraceEntity.setModuleId(moduleId!=null?moduleId:"");
-        spanStackTraceEntity.setClassname(classname!=null?classname:"");
-        spanStackTraceEntity.setMethodName(methodName!=null?methodName:"");
+        spanStackTraceEntity.setStackIndex(stackIndex != null ? stackIndex : -1);
+        spanStackTraceEntity.setModuleId(moduleId != null ? moduleId : "");
+        spanStackTraceEntity.setClassname(classname != null ? classname : "");
+        spanStackTraceEntity.setMethodName(methodName != null ? methodName : "");
         spanStackTraceEntity.setLine(lineNumber);
         spanStackTraceEntity.setFilename(filename);
         spanStackTraceEntity = traceSpanService.saveSpanStackTrace(spanStackTraceEntity);
@@ -111,7 +112,7 @@ public class TraceController {
             @RequestParam("name") String name,
             @RequestParam("value") String value,
             @RequestParam("line") Integer line) {
-        if(StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
+        if (StringUtils.isEmpty(traceId) || StringUtils.isEmpty(spanId) || StringUtils.isEmpty(name)) {
             return "empty traceId or spanId or name";
         }
         SpanDumpItemEntity spanDumpItemEntity = new SpanDumpItemEntity();
@@ -146,7 +147,7 @@ public class TraceController {
         List<SpanDumpItemEntity> allSpanDumps = traceSpanService.findAllDumpsByTraceIdAndIdGreaterThanOrderByIdAsc(traceId, 0);
         List<SpanDumpItemEntity> resultDumps = new ArrayList<>();
         SpanDumpItemEntity before = null;
-        for(SpanDumpItemEntity spanDumpItem : allSpanDumps) {
+        for (SpanDumpItemEntity spanDumpItem : allSpanDumps) {
             // 连续两个一样的spanId的dump，只返回前一个
             try {
                 if (before == null) {
@@ -198,7 +199,7 @@ public class TraceController {
     @PostMapping("/view_stack_variables/span")
     public Object viewStackVariablesInSpan(@RequestBody ViewStackVariablesForm form) {
         StackVarSnapshotVo stackVarSnapshot = traceSpanService.listAllMergedSpanDumpsBySpanIdAndSeqInSpan(
-                form.getSpanId(), form.getSeqInSpan()!=null?form.getSeqInSpan():0);
+                form.getSpanId(), form.getSeqInSpan() != null ? form.getSeqInSpan() : 0);
         return stackVarSnapshot;
     }
 
